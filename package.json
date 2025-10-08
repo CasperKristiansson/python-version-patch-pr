@@ -1,0 +1,41 @@
+{
+  "name": "python-version-patch-pr",
+  "version": "0.1.0",
+  "description": "This repository hosts a GitHub Action that watches for new CPython patch releases and prepares pull requests to upgrade repositories that pin exact Python patch versions. The action is currently under active development.",
+  "private": true,
+  "main": "dist/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "clean": "rm -rf dist",
+    "pretest": "npm run build",
+    "test": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CasperKristiansson/python-version-patch-pr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/CasperKristiansson/python-version-patch-pr/issues"
+  },
+  "homepage": "https://github.com/CasperKristiansson/python-version-patch-pr#readme",
+  "dependencies": {
+    "@actions/core": "^1.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "typescript": "^5.4.5"
+  }
+}

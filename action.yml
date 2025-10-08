@@ -1,0 +1,9 @@
+name: CPython Patch PR Action
+description: "Scaffolded placeholder for the CPython patch PR GitHub Action."
+author: Casper Kristiansson
+runs:
+  using: node20
+  main: dist/index.js
+defaults:
+  run:
+    shell: bash

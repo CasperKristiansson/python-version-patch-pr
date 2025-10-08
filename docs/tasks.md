@@ -69,7 +69,7 @@ Use Context7 MCP for up to date documentation.
        Files: `LICENSE` (MIT), `README.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `CONTRIBUTING.md`, `.gitignore`.
        Verify: Repo visible. GitHub detects license.
 
-2. [ ] **Scaffold TypeScript action**
+2. [x] **Scaffold TypeScript action**
        Tools: `npm`, `tsc`, template `actions/typescript-action`.
        Files: `package.json`, `tsconfig.json`, `action.yml`, `src/index.ts`.
        Verify: `npm run build` succeeds. `node dist/index.js` prints placeholder.

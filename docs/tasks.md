@@ -83,7 +83,7 @@ Use Context7 MCP for up to date documentation.
        Install `eslint`, `prettier`, `vitest`, `@types/node`, `@vercel/ncc`, `actionlint`.
        Verify: `npm run lint` and `npm run test` pass.
 
-5. [ ] **CI for build/test**
+5. [x] **CI for build/test**
        Workflow `.github/workflows/ci.yml` runs lint, test, build, ncc.
        Verify: CI green on PR.
 

@@ -1,0 +1,2 @@
+FROM python:3.13.4-slim
+ARG PYTHON_VERSION="3.8.19"

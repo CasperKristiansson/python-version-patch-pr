@@ -117,7 +117,7 @@ Use Context7 MCP for up to date documentation.
         Patterns for workflows, Dockerfiles, `.python-version`, `.tool-versions`, `runtime.txt`, `tox.ini`, `pyproject.toml`, `Pipfile`, `environment.yml`.
         Verify: Positive/negative unit tests per pattern.
 
-12. [ ] **Scanner module**
+12. [x] **Scanner module**
         Collect matches with file, position, `X.Y.Z`, `X.Y`.
         Verify: Snapshot test over fixture repo.
 

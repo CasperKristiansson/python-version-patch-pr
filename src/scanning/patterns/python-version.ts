@@ -27,7 +27,9 @@ export const pythonVersionPatterns: PatternDefinition[] = [
       const isYaml = normalized.endsWith('.yml') || normalized.endsWith('.yaml');
       return isWorkflowFile && isYaml;
     },
-    regexes: [new RegExp(`python-version\\s*:\\s*["]?(?<version>${VERSION_PATTERN})["]?`, 'gi')],
+    regexes: [
+      new RegExp(String.raw`python-version\s*:\s*['"]?(?<version>${VERSION_PATTERN})['"]?`, 'gi'),
+    ],
   },
   {
     id: 'dockerfile-from',
@@ -36,7 +38,7 @@ export const pythonVersionPatterns: PatternDefinition[] = [
     regexes: [
       new RegExp(`FROM\\s+[^\\s]*python[^\\s:]*:(?<version>${VERSION_PATTERN})`, 'gi'),
       new RegExp(
-        `\\b(?:ARG|ENV)\\s+PYTHON[_-]?VERSION\\s*=\\s*["]?(?<version>${VERSION_PATTERN})["]?`,
+        String.raw`\b(?:ARG|ENV)\s+PYTHON[_-]?VERSION\s*=\s*['"]?(?<version>${VERSION_PATTERN})['"]?`,
         'gi',
       ),
     ],

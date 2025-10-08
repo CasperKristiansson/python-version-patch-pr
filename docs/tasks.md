@@ -113,7 +113,7 @@ Use Context7 MCP for up to date documentation.
         Lib: `fast-glob`. Ignore `node_modules`, `.git`, `dist`.
         Verify: Unit test ensures correct file set.
 
-11. [ ] **Regex matchers**
+11. [x] **Regex matchers**
         Patterns for workflows, Dockerfiles, `.python-version`, `.tool-versions`, `runtime.txt`, `tox.ini`, `pyproject.toml`, `Pipfile`, `environment.yml`.
         Verify: Positive/negative unit tests per pattern.
 

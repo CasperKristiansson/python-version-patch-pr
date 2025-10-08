@@ -98,7 +98,7 @@ Use Context7 MCP for up to date documentation.
        Input: `3.13` → output highest `3.13.Z`.
        Verify: Unit test picks max.
 
-8. [ ] **python.org releases fallback**
+8. [x] **python.org releases fallback**
        Scrape minimal list from source releases if GitHub fails.
        Verify: Mock HTML test extracts `3.13.Z`.
 

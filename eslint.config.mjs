@@ -22,6 +22,7 @@ export default [
         URL: 'readonly',
         AbortController: 'readonly',
         AbortSignal: 'readonly',
+        Response: 'readonly',
       },
     },
     plugins: {

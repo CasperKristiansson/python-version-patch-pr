@@ -121,7 +121,7 @@ Use Context7 MCP for up to date documentation.
         Collect matches with file, position, `X.Y.Z`, `X.Y`.
         Verify: Snapshot test over fixture repo.
 
-13. [ ] **Single X.Y alignment**
+13. [x] **Single X.Y alignment**
         Abort with `skipped_reason=multiple_tracks_detected` if mixed tracks (default).
         Verify: Unit test triggers skip.
 

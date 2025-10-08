@@ -4,3 +4,6 @@ export type { VersionMatch } from './patterns/python-version';
 
 export { scanForPythonVersions } from './scanner';
 export type { ScanOptions, ScanResult } from './scanner';
+
+export { determineSingleTrack } from './track-alignment';
+export type { TrackAlignmentResult } from './track-alignment';

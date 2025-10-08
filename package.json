@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "bundle": "ncc build src/index.ts -o dist",
-    "clean": "rm -rf dist",
+    "clean": "rimraf dist",
     "lint": "eslint \"{src,tests}/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --check .",
@@ -51,6 +51,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
     "tsx": "^4.20.6",
     "typescript": "^5.4.5",
     "vitest": "^3.2.4"

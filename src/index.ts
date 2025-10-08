@@ -28,6 +28,11 @@ function getBooleanInput(name: string, fallback: boolean): boolean {
   return fallback;
 }
 
+function resolvePathsInput(): string[] {
+  const explicitPaths = core.getMultilineInput('paths', { trimWhitespace: true }).filter(Boolean);
+  return explicitPaths.length > 0 ? explicitPaths : DEFAULT_PATHS;
+}
+
 export async function run(): Promise<void> {
   try {
     const trackInput = core.getInput('track').trim();
@@ -36,9 +41,7 @@ export async function run(): Promise<void> {
     const includePrerelease = getBooleanInput('include_prerelease', false);
     const automerge = getBooleanInput('automerge', false);
     const dryRun = getBooleanInput('dry_run', false);
-
-    const explicitPaths = core.getMultilineInput('paths', { trimWhitespace: true }).filter(Boolean);
-    const effectivePaths = explicitPaths.length > 0 ? explicitPaths : DEFAULT_PATHS;
+    const effectivePaths = resolvePathsInput();
 
     core.startGroup('Configuration');
     core.info(`track: ${track}`);
@@ -48,7 +51,6 @@ export async function run(): Promise<void> {
     core.info(`dry_run: ${dryRun}`);
     core.endGroup();
 
-    // Placeholder output until the implementation is completed in later tasks.
     core.info('CPython Patch PR Action placeholder executing.');
     core.setOutput('new_version', '');
     core.setOutput('files_changed', JSON.stringify([]));

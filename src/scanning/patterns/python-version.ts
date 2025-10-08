@@ -6,6 +6,7 @@ export interface VersionMatch {
   major: number;
   minor: number;
   patch: number;
+  index: number;
 }
 
 interface PatternDefinition {
@@ -191,6 +192,7 @@ export function findPythonVersionMatches(filePath: string, content: string): Ver
           major,
           minor,
           patch,
+          index: versionIndex,
         });
       }
     }

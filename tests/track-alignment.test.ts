@@ -11,6 +11,7 @@ const createMatch = (major: number, minor: number, patch: number): VersionMatch 
   major,
   minor,
   patch,
+  index: 0,
 });
 
 describe('determineSingleTrack', () => {

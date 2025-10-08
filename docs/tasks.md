@@ -127,7 +127,7 @@ Use Context7 MCP for up to date documentation.
 
 ## 4) Rewrite engine
 
-14. [ ] **Patch computation**
+14. [x] **Patch computation**
         Replace `X.Y.Z_old` with `X.Y.Z_new` only when same `X.Y`. Preserve Docker suffixes.
         Verify: Unit tests show minimal diff.
 

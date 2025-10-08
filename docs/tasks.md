@@ -102,7 +102,7 @@ Use Context7 MCP for up to date documentation.
        Scrape minimal list from source releases if GitHub fails.
        Verify: Mock HTML test extracts `3.13.Z`.
 
-9. [ ] **Runner availability check**
+9. [x] **Runner availability check**
        Fetch `actions/python-versions` `versions-manifest.json`.
        Check ubuntu/macos/windows presence for `X.Y.Z`.
        Verify: Tests for present and missing versions. Flag respected.

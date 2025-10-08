@@ -131,11 +131,11 @@ Use Context7 MCP for up to date documentation.
         Replace `X.Y.Z_old` with `X.Y.Z_new` only when same `X.Y`. Preserve Docker suffixes.
         Verify: Unit tests show minimal diff.
 
-15. [ ] **Dry-run**
+15. [x] **Dry-run**
         No writes. Summarize planned changes.
         Verify: File hashes unchanged. Summary contains diffs.
 
-16. [ ] **Idempotence**
+16. [x] **Idempotence**
         If already at latest, set `skipped_reason=already_latest`.
         Verify: Second run produces skip.
 

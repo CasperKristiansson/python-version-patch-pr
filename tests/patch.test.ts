@@ -26,6 +26,8 @@ describe('computePatch', () => {
     expect(result.changed).toBe(true);
     expect(result.updatedContent).toBe('FROM python:3.12.6-slim\nARG PYTHON_VERSION="3.12.6"');
     expect(result.replacements).toHaveLength(2);
+    expect(result.fromVersion).toBe('3.12.5');
+    expect(result.toVersion).toBe('3.12.6');
   });
 
   it('ignores files without matches', () => {

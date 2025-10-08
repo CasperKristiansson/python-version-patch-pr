@@ -13,6 +13,8 @@ export interface PatchResult {
   updatedContent: string;
   changed: boolean;
   replacements: VersionMatch[];
+  fromVersion: string;
+  toVersion: string;
 }
 
 function shareTrack(fromVersion: string, toVersion: string): boolean {
@@ -31,6 +33,8 @@ export function computePatch(context: RewriteContext): PatchResult {
       updatedContent: originalContent,
       changed: false,
       replacements: [],
+      fromVersion,
+      toVersion,
     };
   }
 
@@ -44,6 +48,8 @@ export function computePatch(context: RewriteContext): PatchResult {
       updatedContent: originalContent,
       changed: false,
       replacements: [],
+      fromVersion,
+      toVersion,
     };
   }
 
@@ -68,5 +74,7 @@ export function computePatch(context: RewriteContext): PatchResult {
     updatedContent,
     changed,
     replacements,
+    fromVersion,
+    toVersion,
   };
 }

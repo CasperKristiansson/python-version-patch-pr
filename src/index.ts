@@ -1,34 +1,49 @@
 import * as core from '@actions/core';
 
-async function run(): Promise<void> {
-  try {
-    const track = core.getInput('track') || '3.13';
-    const includePrerelease =
-      core.getInput('include_prerelease').toLowerCase() === 'true';
-    const paths =
-      core
-        .getMultilineInput('paths', { trimWhitespace: true })
-        .filter(Boolean) || [];
-    const automerge = core.getInput('automerge').toLowerCase() === 'true';
-    const dryRun = core.getInput('dry_run').toLowerCase() === 'true';
+const DEFAULT_TRACK = '3.13';
+const DEFAULT_PATHS = [
+  '.github/workflows/**/*.yml',
+  'Dockerfile',
+  '**/Dockerfile',
+  '**/*.python-version',
+  '**/runtime.txt',
+  '**/pyproject.toml',
+];
 
-    const effectivePaths =
-      paths.length > 0
-        ? paths
-        : [
-            '.github/workflows/**/*.yml',
-            '**/Dockerfile',
-            '**/.python-version',
-            '**/runtime.txt',
-            '**/pyproject.toml'
-          ];
+function getBooleanInput(name: string, fallback: boolean): boolean {
+  const raw = core.getInput(name).trim().toLowerCase();
+  if (raw === '') {
+    return fallback;
+  }
+
+  if (raw === 'true') {
+    return true;
+  }
+
+  if (raw === 'false') {
+    return false;
+  }
+
+  core.warning(`Input "${name}" received unexpected value "${raw}". Falling back to ${fallback}.`);
+  return fallback;
+}
+
+export async function run(): Promise<void> {
+  try {
+    const trackInput = core.getInput('track').trim();
+    const track = trackInput === '' ? DEFAULT_TRACK : trackInput;
+
+    const includePrerelease = getBooleanInput('include_prerelease', false);
+    const automerge = getBooleanInput('automerge', false);
+    const dryRun = getBooleanInput('dry_run', false);
+
+    const explicitPaths = core.getMultilineInput('paths', { trimWhitespace: true }).filter(Boolean);
+    const effectivePaths = explicitPaths.length > 0 ? explicitPaths : DEFAULT_PATHS;
 
     core.startGroup('Configuration');
     core.info(`track: ${track}`);
     core.info(`include_prerelease: ${includePrerelease}`);
-    core.info(
-      `paths (${effectivePaths.length}): ${effectivePaths.join(', ')}`
-    );
+    core.info(`paths (${effectivePaths.length}): ${effectivePaths.join(', ')}`);
     core.info(`automerge: ${automerge}`);
     core.info(`dry_run: ${dryRun}`);
     core.endGroup();
@@ -47,4 +62,6 @@ async function run(): Promise<void> {
   }
 }
 
-void run();
+if (require.main === module) {
+  void run();
+}

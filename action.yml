@@ -5,11 +5,11 @@ inputs:
   track:
     description: CPython minor series to track (for example 3.13).
     required: false
-    default: "3.13"
+    default: '3.13'
   include_prerelease:
     description: Include pre-release tags when resolving the latest patch version.
     required: false
-    default: "false"
+    default: 'false'
   paths:
     description: Newline-separated glob patterns that determine which files to scan for pinned Python versions.
     required: false
@@ -23,11 +23,11 @@ inputs:
   automerge:
     description: Attempt to automerge the pull request after required checks succeed.
     required: false
-    default: "false"
+    default: 'false'
   dry_run:
     description: Skip file modifications and output the planned changes only.
     required: false
-    default: "false"
+    default: 'false'
 outputs:
   new_version:
     description: Resolved CPython patch version (for example 3.13.5).

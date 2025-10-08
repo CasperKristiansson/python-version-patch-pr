@@ -79,7 +79,7 @@ Use Context7 MCP for up to date documentation.
        Outputs: `new_version`, `files_changed`, `skipped_reason`. `runs: node20`.
        Verify: `actionlint` passes on sample workflow.
 
-4. [ ] **Add dev tooling**
+4. [x] **Add dev tooling**
        Install `eslint`, `prettier`, `vitest`, `@types/node`, `@vercel/ncc`, `actionlint`.
        Verify: `npm run lint` and `npm run test` pass.
 

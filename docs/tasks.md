@@ -153,21 +153,21 @@ Use Context7 MCP for up to date documentation.
         Title, body with changelog links, manifest evidence, diff summary, rollback. Labels.
         Verify: Sandbox repo e2e PR opens with exact content.
 
-20. [ ] **Duplicate PR prevention**
+20. [x] **Duplicate PR prevention**
         Search open PRs by head branch. Update branch if present.
         Verify: Second run updates same PR.
 
-21. [ ] **Optional external PR action**
+21. [x] **Optional external PR action**
         Flag `use_external_pr_action`. Skip internal PR. Emit outputs for `peter-evans/create-pull-request`.
         Verify: Example workflow successfully creates PR.
 
-22. [ ] **Automerge**
+22. [x] **Automerge**
         If `automerge=true`, set label or merge on green via API when permitted.
         Verify: Sandbox e2e merges.
 
 ## 6) Docs and UX
 
-23. [ ] **README quick start + advanced config**
+23. [x] **README quick start + advanced config**
         Include minimal and guarded examples, inputs/outputs tables, permissions, FAQs.
         Verify: `actionlint` validates examples.
 

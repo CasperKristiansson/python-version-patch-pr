@@ -80,4 +80,21 @@ describe('createOrUpdatePullRequest', () => {
     });
     expect(result).toEqual({ action: 'updated', number: 7, url: 'https://pr/7' });
   });
+
+  it('reuses an existing pull request on subsequent calls', async () => {
+    const { client, list, create, update } = createClient();
+    list
+      .mockResolvedValueOnce({ data: [] })
+      .mockResolvedValueOnce({ data: [{ number: 9, html_url: 'https://pr/9' }] });
+    create.mockResolvedValue({ data: { number: 9, html_url: 'https://pr/9' } });
+    update.mockResolvedValue({ data: { number: 9, html_url: 'https://pr/9' } });
+
+    const first = await createOrUpdatePullRequest({ ...baseOptions, client });
+    const second = await createOrUpdatePullRequest({ ...baseOptions, client });
+
+    expect(first.action).toBe('created');
+    expect(second.action).toBe('updated');
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledTimes(1);
+  });
 });

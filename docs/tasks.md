@@ -109,7 +109,7 @@ Use Context7 MCP for up to date documentation.
 
 ## 3) Repo scanning and matching
 
-10. [ ] **Glob discovery**
+10. [x] **Glob discovery**
         Lib: `fast-glob`. Ignore `node_modules`, `.git`, `dist`.
         Verify: Unit test ensures correct file set.
 

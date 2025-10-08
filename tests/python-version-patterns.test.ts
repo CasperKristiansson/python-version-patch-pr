@@ -56,6 +56,13 @@ describe('findPythonVersionMatches', () => {
     expect(matches.map((match) => match.matched)).toEqual(['3.10.8']);
   });
 
+  it('captures python_version entries in pyproject tool tables', () => {
+    const content = `[tool.mypy]\npython_version = "3.10.8"`;
+    const matches = findPythonVersionMatches('pyproject.toml', content);
+
+    expect(matches.map((match) => match.matched)).toEqual(['3.10.8']);
+  });
+
   it('finds pinned versions in tox.ini', () => {
     const content = `python_version = 3.7.17\nbasepython = python3.7.17`;
     const matches = findPythonVersionMatches('tox.ini', content);

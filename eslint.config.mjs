@@ -19,6 +19,9 @@ export default [
       globals: {
         require: 'readonly',
         module: 'readonly',
+        URL: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
       },
     },
     plugins: {

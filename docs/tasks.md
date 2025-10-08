@@ -89,7 +89,7 @@ Use Context7 MCP for up to date documentation.
 
 ## 2) Core version discovery
 
-6. [ ] **CPython stable tag fetcher**
+6. [x] **CPython stable tag fetcher**
        Libs: `undici`, `semver`.
        Logic: GitHub tags pagination, filter out `a/b/rc/dev`.
        Verify: Unit test with mocked pages returns only stable tags.

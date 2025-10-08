@@ -149,7 +149,7 @@ Use Context7 MCP for up to date documentation.
         Create `chore/bump-python-<track>`. Commit updated files.
         Verify: Local e2e shows new branch and commit.
 
-19. [ ] **Create PR via Octokit**
+19. [x] **Create PR via Octokit**
         Title, body with changelog links, manifest evidence, diff summary, rollback. Labels.
         Verify: Sandbox repo e2e PR opens with exact content.
 

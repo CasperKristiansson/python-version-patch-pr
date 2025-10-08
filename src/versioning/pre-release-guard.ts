@@ -13,7 +13,7 @@ export function enforcePreReleaseGuard(
     return { allowed: true };
   }
 
-  const parsed = semver.parse(version, { includePrerelease: true, loose: true });
+  const parsed = semver.parse(version, { loose: true });
   if (!parsed) {
     return { allowed: true };
   }

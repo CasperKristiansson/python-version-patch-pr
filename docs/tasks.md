@@ -145,7 +145,7 @@ Use Context7 MCP for up to date documentation.
 
 ## 5) PR creation and safety
 
-18. [ ] **Git branch and commit**
+18. [x] **Git branch and commit**
         Create `chore/bump-python-<track>`. Commit updated files.
         Verify: Local e2e shows new branch and commit.
 

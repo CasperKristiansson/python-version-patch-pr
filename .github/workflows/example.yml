@@ -1,0 +1,21 @@
+name: Example Usage
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run CPython Patch PR Action
+        uses: ./
+        with:
+          track: '3.13'
+          include_prerelease: false
+          paths: |
+            .github/workflows/**/*.yml
+            Dockerfile
+            pyproject.toml
+          automerge: false
+          dry_run: true

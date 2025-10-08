@@ -74,7 +74,7 @@ Use Context7 MCP for up to date documentation.
        Files: `package.json`, `tsconfig.json`, `action.yml`, `src/index.ts`.
        Verify: `npm run build` succeeds. `node dist/index.js` prints placeholder.
 
-3. [ ] **Define action metadata**
+3. [x] **Define action metadata**
        Inputs: `track`, `include_prerelease`, `paths`, `automerge`, `dry_run`.
        Outputs: `new_version`, `files_changed`, `skipped_reason`. `runs: node20`.
        Verify: `actionlint` passes on sample workflow.

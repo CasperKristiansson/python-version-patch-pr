@@ -1,9 +1,40 @@
 name: CPython Patch PR Action
-description: "Scaffolded placeholder for the CPython patch PR GitHub Action."
+description: Track CPython patch releases and prepare update pull requests.
 author: Casper Kristiansson
+inputs:
+  track:
+    description: CPython minor series to track (for example 3.13).
+    required: false
+    default: "3.13"
+  include_prerelease:
+    description: Include pre-release tags when resolving the latest patch version.
+    required: false
+    default: "false"
+  paths:
+    description: Newline-separated glob patterns that determine which files to scan for pinned Python versions.
+    required: false
+    default: |
+      .github/workflows/**/*.yml
+      Dockerfile
+      **/Dockerfile
+      **/*.python-version
+      **/runtime.txt
+      **/pyproject.toml
+  automerge:
+    description: Attempt to automerge the pull request after required checks succeed.
+    required: false
+    default: "false"
+  dry_run:
+    description: Skip file modifications and output the planned changes only.
+    required: false
+    default: "false"
+outputs:
+  new_version:
+    description: Resolved CPython patch version (for example 3.13.5).
+  files_changed:
+    description: JSON array listing files that were updated.
+  skipped_reason:
+    description: Machine-readable reason describing why no update was applied.
 runs:
   using: node20
   main: dist/index.js
-defaults:
-  run:
-    shell: bash

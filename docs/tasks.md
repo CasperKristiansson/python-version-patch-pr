@@ -94,7 +94,7 @@ Use Context7 MCP for up to date documentation.
        Logic: GitHub tags pagination, filter out `a/b/rc/dev`.
        Verify: Unit test with mocked pages returns only stable tags.
 
-7. [ ] **Latest patch resolver for X.Y**
+7. [x] **Latest patch resolver for X.Y**
        Input: `3.13` → output highest `3.13.Z`.
        Verify: Unit test picks max.
 

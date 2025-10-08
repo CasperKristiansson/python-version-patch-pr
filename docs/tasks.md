@@ -139,7 +139,7 @@ Use Context7 MCP for up to date documentation.
         If already at latest, set `skipped_reason=already_latest`.
         Verify: Second run produces skip.
 
-17. [ ] **Pre-release guard**
+17. [x] **Pre-release guard**
         Default off. Enabled by `include_prerelease=true`.
         Verify: Tests confirm behavior.
 

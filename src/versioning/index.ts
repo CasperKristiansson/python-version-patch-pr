@@ -6,3 +6,6 @@ export type { PythonOrgFallbackOptions, PythonOrgVersion } from './python-org-fa
 
 export { fetchRunnerAvailability } from './runner-availability';
 export type { RunnerAvailability, RunnerAvailabilityOptions } from './runner-availability';
+
+export { enforcePreReleaseGuard } from './pre-release-guard';
+export type { PreReleaseGuardResult } from './pre-release-guard';

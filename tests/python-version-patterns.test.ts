@@ -12,6 +12,15 @@ describe('findPythonVersionMatches', () => {
     expect(matches[0]?.matched).toBe('3.13.2');
   });
 
+  it('normalizes Windows-style workflow paths', () => {
+    const content = `jobs:\n  build:\n    steps:\n      - uses: actions/setup-python@v4\n        with:\n          python-version: "3.13.5"`;
+
+    const matches = findPythonVersionMatches('.github\\workflows\\ci.yml', content);
+
+    expect(matches).toHaveLength(1);
+    expect(matches[0]?.matched).toBe('3.13.5');
+  });
+
   it('captures versions within Dockerfiles', () => {
     const content = `FROM python:3.13.2-slim\nARG PYTHON_VERSION="3.12.8"\nENV PYTHON_VERSION=3.12.8`;
 

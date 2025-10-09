@@ -259,7 +259,7 @@ Use Context7 MCP for up to date documentation.
         Output JSON of changed files and new version.
         Verify: Example consumes output.
 
-44. [ ] **Windows path handling**
+44. [x] **Windows path handling**
         Use `node:path`. Add Windows CI job.
         Verify: Windows runner green.
 

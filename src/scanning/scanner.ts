@@ -46,17 +46,18 @@ export async function scanForPythonVersions(options: ScanOptions): Promise<ScanR
 
   for (const relative of relativeFiles) {
     const absolute = path.join(root, relative);
+    const relativePosix = relative.split(path.win32.sep).join(path.posix.sep);
     const content = await readFileSafe(absolute);
     if (content === null) {
       continue;
     }
 
     filesScanned += 1;
-    const fileMatches = findPythonVersionMatches(relative, content);
+    const fileMatches = findPythonVersionMatches(relativePosix, content);
     matches.push(
       ...fileMatches.map((match) => ({
         ...match,
-        file: relative,
+        file: relativePosix,
       })),
     );
   }

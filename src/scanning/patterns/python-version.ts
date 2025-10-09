@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 export interface VersionMatch {
   file: string;
   line: number;
@@ -103,13 +105,12 @@ export const pythonVersionPatterns: PatternDefinition[] = [
 ];
 
 function normalizePath(filePath: string): string {
-  return filePath.replace(/\\\\/g, '/');
+  return filePath.split(path.win32.sep).join(path.posix.sep);
 }
 
 function getBasename(filePath: string): string {
   const normalized = normalizePath(filePath);
-  const index = normalized.lastIndexOf('/');
-  const base = index === -1 ? normalized : normalized.slice(index + 1);
+  const base = path.posix.basename(normalized);
   return base.toLowerCase();
 }
 

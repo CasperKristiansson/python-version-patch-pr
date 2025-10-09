@@ -53,7 +53,9 @@ export async function fetchReleaseNotes(
   }
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch release notes for ${normalizedTag} (status ${response.status}).`);
+    throw new Error(
+      `Failed to fetch release notes for ${normalizedTag} (status ${response.status}).`,
+    );
   }
 
   const payload = (await response.json()) as GitHubReleasePayload;

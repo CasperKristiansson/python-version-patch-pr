@@ -189,13 +189,13 @@ Use Context7 MCP for up to date documentation.
         Cover fetchers, parsers, matchers, rewriter, PR logic (mocked).
         Verify: Coverage ≥ 90%.
 
-28. [ ] **Fixture repos**
-        Cases: only workflows, only Docker, mixed, conflicting tracks, prerelease-only.
-        Verify: Snapshot outputs stable.
+28. [-] **Fixture repos**
+    Cases: only workflows, only Docker, mixed, conflicting tracks, prerelease-only.
+    Verify: Snapshot outputs stable.
 
-29. [ ] **Dry-run CI job on fixtures**
-        Upload `GITHUB_STEP_SUMMARY` artifacts.
-        Verify: Artifacts contain expected diffs.
+29. [x] **Dry-run CI job on fixtures**
+       Upload `GITHUB_STEP_SUMMARY` artifacts.
+       Verify: Artifacts contain expected diffs.
 
 30. [ ] **E2E sandbox nightly**
         Nightly scheduled PR cycle in a sandbox repo.
@@ -266,3 +266,5 @@ Use Context7 MCP for up to date documentation.
 45. [ ] **Performance baseline**
         Log files scanned and duration.
         Verify: Fixture scan < 3s on CI.
+
+- [ ] Complete work on Task 28 (fixture repositories)

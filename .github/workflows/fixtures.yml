@@ -1,0 +1,39 @@
+name: Fixture Dry Run
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        fixture: [basic, workflow]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Bundle action
+        run: npm run bundle
+
+      - name: Dry run CPython patch updates
+        uses: ./
+        with:
+          track: '3.11'
+          dry_run: true
+          paths: |
+            fixtures/${{ matrix.fixture }}/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

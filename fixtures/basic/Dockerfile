@@ -1,0 +1,2 @@
+FROM python:3.11.6-slim
+ENV PYTHON_VERSION=3.11.6

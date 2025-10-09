@@ -1,4 +1,7 @@
 import { Octokit } from '@octokit/rest';
+import { throttling } from '@octokit/plugin-throttling';
+
+const ThrottledOctokit = Octokit.plugin(throttling);
 
 export interface OctokitClient {
   pulls: {
@@ -52,7 +55,14 @@ export interface PullRequestResult {
 const USER_AGENT = 'python-version-patch-pr/0.1.0';
 
 function createClient(authToken: string): OctokitClient {
-  return new Octokit({ auth: authToken, userAgent: USER_AGENT });
+  return new ThrottledOctokit({
+    auth: authToken,
+    userAgent: USER_AGENT,
+    throttle: {
+      onRateLimit: (_retryAfter, options) => options.request.retryCount === 0,
+      onSecondaryRateLimit: () => true,
+    },
+  });
 }
 
 export async function createOrUpdatePullRequest(

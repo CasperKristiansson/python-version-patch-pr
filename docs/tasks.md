@@ -194,14 +194,14 @@ Use Context7 MCP for up to date documentation.
     Verify: Snapshot outputs stable.
 
 29. [x] **Dry-run CI job on fixtures**
-       Upload `GITHUB_STEP_SUMMARY` artifacts.
-       Verify: Artifacts contain expected diffs.
+        Upload `GITHUB_STEP_SUMMARY` artifacts.
+        Verify: Artifacts contain expected diffs.
 
 30. [x] **E2E sandbox nightly**
         Nightly scheduled PR cycle in a sandbox repo.
         Verify: PR created and closes as expected.
 
-31. [ ] **API throttling**
+31. [x] **API throttling**
         Use Octokit throttling plugin. Retry with backoff.
         Verify: Tests assert retries and clear messages.
 

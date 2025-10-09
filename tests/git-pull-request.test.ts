@@ -4,8 +4,20 @@ const octokitModule = vi.hoisted(() => {
   const list = vi.fn();
   const create = vi.fn();
   const update = vi.fn();
-  const Octokit = vi.fn().mockImplementation(() => ({ pulls: { list, create, update } }));
-  return { Octokit, list, create, update };
+  const OctokitBase = vi
+    .fn()
+    .mockImplementation((options: { throttle?: Record<string, unknown> }) => {
+      if (options.throttle && typeof options.throttle.onRateLimit === 'function') {
+        options.throttle.onRateLimit(1, { method: 'GET', url: 'test', request: { retryCount: 0 } });
+      }
+      if (options.throttle && typeof options.throttle.onSecondaryRateLimit === 'function') {
+        options.throttle.onSecondaryRateLimit(1, { method: 'GET', url: 'test' });
+      }
+      return { pulls: { list, create, update } };
+    });
+  const plugin = vi.fn(() => OctokitBase);
+  Object.assign(OctokitBase, { plugin });
+  return { Octokit: OctokitBase, list, create, update, plugin };
 });
 
 vi.mock('@octokit/rest', () => ({
@@ -121,10 +133,16 @@ describe('createOrUpdatePullRequest', () => {
 
     const result = await createOrUpdatePullRequest(baseOptions);
 
-    expect(octokitModule.Octokit).toHaveBeenCalledWith({
-      auth: 'token',
-      userAgent: 'python-version-patch-pr/0.1.0',
-    });
+    expect(octokitModule.Octokit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        auth: 'token',
+        userAgent: 'python-version-patch-pr/0.1.0',
+        throttle: expect.objectContaining({
+          onRateLimit: expect.any(Function),
+          onSecondaryRateLimit: expect.any(Function),
+        }),
+      }),
+    );
     expect(result).toEqual({ action: 'created', number: 5, url: undefined });
   });
 });

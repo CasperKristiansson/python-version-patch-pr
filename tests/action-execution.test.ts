@@ -1,6 +1,10 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-
-import { executeAction, type ExecuteDependencies } from '../src/action-execution';
+import {
+  executeAction,
+  type ExecuteDependencies,
+  type ExecuteOptions,
+} from '../src/action-execution';
+import type { PullRequestResult } from '../src/git';
 import type { VersionMatch } from '../src/scanning';
 import type { ScanResult } from '../src/scanning/scanner';
 
@@ -38,14 +42,16 @@ const baseDependencies = (): ExecuteDependencies => ({
     availableOn: { linux: true, mac: true, win: true },
   })),
   findExistingPullRequest: vi.fn(),
-  createOrUpdatePullRequest: vi.fn(async () => ({
-    action: 'created',
-    number: 1,
-    url: undefined,
-  })),
+  createOrUpdatePullRequest: vi.fn(
+    async (): Promise<PullRequestResult> => ({
+      action: 'created',
+      number: 1,
+      url: undefined,
+    }),
+  ),
 });
 
-const baseOptions = {
+const baseOptions: ExecuteOptions = {
   workspace: '.',
   track: '3.13',
   includePrerelease: false,
@@ -56,7 +62,9 @@ const baseOptions = {
   repository: null,
   defaultBranch: 'main',
   allowPrCreation: false,
-} as const;
+  noNetworkFallback: false,
+  snapshots: undefined,
+};
 
 describe('executeAction failure modes', () => {
   let deps: ExecuteDependencies;
@@ -145,7 +153,7 @@ describe('executeAction failure modes', () => {
 
   it('returns pr_creation_failed when PR creation throws', async () => {
     deps.findExistingPullRequest = vi.fn(async () => null);
-    deps.createOrUpdatePullRequest = vi.fn(async () => {
+    deps.createOrUpdatePullRequest = vi.fn(async (): Promise<PullRequestResult> => {
       throw new Error('boom');
     });
 

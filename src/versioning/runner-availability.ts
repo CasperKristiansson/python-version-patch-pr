@@ -9,6 +9,8 @@ type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 export interface RunnerAvailabilityOptions {
   fetchImpl?: FetchLike;
   signal?: AbortSignal;
+  noNetworkFallback?: boolean;
+  manifestSnapshot?: unknown;
 }
 
 export interface RunnerAvailability {
@@ -69,20 +71,33 @@ export async function fetchRunnerAvailability(
   version: string,
   options: RunnerAvailabilityOptions = {},
 ): Promise<RunnerAvailability | null> {
-  const { fetchImpl = defaultFetch, signal } = options;
+  const { fetchImpl = defaultFetch, signal, noNetworkFallback = false, manifestSnapshot } = options;
 
-  const response = await fetchImpl(MANIFEST_URL, {
-    method: 'GET',
-    signal,
-  } satisfies RequestInit);
+  let payload: unknown;
 
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch versions manifest from actions/python-versions (status ${response.status}).`,
-    );
+  if (manifestSnapshot !== undefined) {
+    payload = manifestSnapshot;
+  } else {
+    if (noNetworkFallback) {
+      throw new Error(
+        'Network access disabled via NO_NETWORK_FALLBACK. Provide manifestSnapshot to fetchRunnerAvailability.',
+      );
+    }
+
+    const response = await fetchImpl(MANIFEST_URL, {
+      method: 'GET',
+      signal,
+    } satisfies RequestInit);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch versions manifest from actions/python-versions (status ${response.status}).`,
+      );
+    }
+
+    payload = await response.json();
   }
 
-  const payload = await response.json();
   const manifestResult = manifestSchema.safeParse(payload);
 
   if (!manifestResult.success) {

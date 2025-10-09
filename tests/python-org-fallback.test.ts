@@ -42,4 +42,20 @@ describe('fetchLatestFromPythonOrg', () => {
       /status 500/,
     );
   });
+
+  it('throws when network disabled without snapshot', async () => {
+    await expect(
+      fetchLatestFromPythonOrg({ track: '3.13', noNetworkFallback: true }),
+    ).rejects.toThrow(/NO_NETWORK_FALLBACK/);
+  });
+
+  it('uses provided HTML snapshot when network disabled', async () => {
+    const result = await fetchLatestFromPythonOrg({
+      track: '3.13',
+      noNetworkFallback: true,
+      htmlSnapshot: SAMPLE_HTML,
+    });
+
+    expect(result).toEqual({ version: '3.13.2' });
+  });
 });

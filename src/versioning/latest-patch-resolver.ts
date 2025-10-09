@@ -8,6 +8,8 @@ export interface ResolveLatestPatchOptions extends FetchStableTagsOptions {
   includePrerelease?: boolean;
   /// Optional override for the tag list, used primarily for testing.
   tags?: StableTag[];
+  /// When true, skip network calls and require tags override.
+  noNetworkFallback?: boolean;
 }
 
 export interface LatestPatchResult {
@@ -43,7 +45,13 @@ export async function resolveLatestPatch(
     throw new Error(`Track "${track}" must be in the form X.Y`);
   }
 
-  const { includePrerelease = false, tags, ...fetchOptions } = options;
+  const { includePrerelease = false, tags, noNetworkFallback = false, ...fetchOptions } = options;
+
+  if (!tags && noNetworkFallback) {
+    throw new Error(
+      'Network access disabled via NO_NETWORK_FALLBACK. Provide tags override to resolve latest patch.',
+    );
+  }
 
   const stableTags = tags ?? (await fetchStableCpythonTags(fetchOptions));
   const candidates = filterByTrack(stableTags, normalizedTrack, includePrerelease);

@@ -69,4 +69,24 @@ describe('fetchRunnerAvailability', () => {
       /status 500/,
     );
   });
+
+  it('throws when network disabled without snapshot', async () => {
+    await expect(fetchRunnerAvailability('3.13.0', { noNetworkFallback: true })).rejects.toThrow(
+      /NO_NETWORK_FALLBACK/,
+    );
+  });
+
+  it('uses provided manifest snapshot when network disabled', async () => {
+    const manifest = [{ version: '3.13.0', files: [{ platform: 'linux' }] }];
+
+    const result = await fetchRunnerAvailability('3.13.0', {
+      noNetworkFallback: true,
+      manifestSnapshot: manifest,
+    });
+
+    expect(result).toEqual({
+      version: '3.13.0',
+      availableOn: { linux: true, mac: false, win: false },
+    });
+  });
 });

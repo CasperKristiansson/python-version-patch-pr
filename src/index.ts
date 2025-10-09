@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from 'node:fs';
 import process from 'node:process';
 
 import * as core from '@actions/core';
@@ -17,6 +18,7 @@ import {
 } from './versioning';
 import { createOrUpdatePullRequest, findExistingPullRequest } from './git';
 import { validateTrack } from './config';
+import type { StableTag } from './github';
 
 const DEFAULT_TRACK = '3.13';
 const DEFAULT_PATHS = [
@@ -49,6 +51,48 @@ function getBooleanInput(name: string, fallback: boolean): boolean {
 function resolvePathsInput(): string[] {
   const explicitPaths = core.getMultilineInput('paths', { trimWhitespace: true }).filter(Boolean);
   return explicitPaths.length > 0 ? explicitPaths : DEFAULT_PATHS;
+}
+
+function loadJsonSnapshot(envName: string): unknown | undefined {
+  const raw = process.env[envName];
+  if (!raw || raw.trim() === '') {
+    return undefined;
+  }
+
+  const trimmed = raw.trim();
+
+  try {
+    return JSON.parse(trimmed);
+  } catch (primaryError) {
+    if (existsSync(trimmed)) {
+      try {
+        const fileContent = readFileSync(trimmed, 'utf8');
+        return JSON.parse(fileContent);
+      } catch (fileError) {
+        throw new Error(
+          `Failed to parse JSON snapshot from ${envName}. Ensure it contains valid JSON or a path to a JSON file. Original error: ${(fileError as Error).message}`,
+        );
+      }
+    }
+
+    throw new Error(
+      `Failed to parse JSON snapshot from ${envName}. Provide valid JSON or a path to a JSON file. Original error: ${(primaryError as Error).message}`,
+    );
+  }
+}
+
+function loadTextSnapshot(envName: string): string | undefined {
+  const raw = process.env[envName];
+  if (!raw || raw.trim() === '') {
+    return undefined;
+  }
+
+  const trimmed = raw.trim();
+  if (existsSync(trimmed)) {
+    return readFileSync(trimmed, 'utf8');
+  }
+
+  return raw;
 }
 
 function parseRepository(slug: string | undefined): { owner: string; repo: string } | null {
@@ -165,6 +209,31 @@ export async function run(): Promise<void> {
     const repository = parseRepository(process.env.GITHUB_REPOSITORY);
     const githubToken = process.env.GITHUB_TOKEN;
     const defaultBranch = process.env.GITHUB_BASE_REF ?? process.env.GITHUB_REF_NAME ?? 'main';
+    const noNetworkFallback = (process.env.NO_NETWORK_FALLBACK ?? '').toLowerCase() === 'true';
+
+    let cpythonTagsSnapshot: StableTag[] | undefined;
+    let pythonOrgHtmlSnapshot: string | undefined;
+    let runnerManifestSnapshot: unknown | undefined;
+
+    try {
+      const rawTagsSnapshot = loadJsonSnapshot('CPYTHON_TAGS_SNAPSHOT');
+      if (rawTagsSnapshot !== undefined) {
+        if (!Array.isArray(rawTagsSnapshot)) {
+          throw new Error('CPYTHON_TAGS_SNAPSHOT must be a JSON array.');
+        }
+        cpythonTagsSnapshot = rawTagsSnapshot as StableTag[];
+      }
+
+      pythonOrgHtmlSnapshot = loadTextSnapshot('PYTHON_ORG_HTML_SNAPSHOT');
+      runnerManifestSnapshot = loadJsonSnapshot('RUNNER_MANIFEST_SNAPSHOT');
+    } catch (snapshotError) {
+      if (snapshotError instanceof Error) {
+        core.setFailed(snapshotError.message);
+      } else {
+        core.setFailed('Failed to load offline snapshots.');
+      }
+      return;
+    }
 
     core.startGroup('Configuration');
     core.info(`workspace: ${workspace}`);
@@ -173,6 +242,7 @@ export async function run(): Promise<void> {
     core.info(`paths (${effectivePaths.length}): ${effectivePaths.join(', ')}`);
     core.info(`automerge: ${automerge}`);
     core.info(`dry_run: ${dryRun}`);
+    core.info(`no_network_fallback: ${noNetworkFallback}`);
     if (repository) {
       core.info(`repository: ${repository.owner}/${repository.repo}`);
     }
@@ -196,6 +266,12 @@ export async function run(): Promise<void> {
         repository,
         defaultBranch,
         allowPrCreation: false,
+        noNetworkFallback,
+        snapshots: {
+          cpythonTags: cpythonTagsSnapshot,
+          pythonOrgHtml: pythonOrgHtmlSnapshot,
+          runnerManifest: runnerManifestSnapshot,
+        },
       },
       dependencies,
     );

@@ -9,6 +9,8 @@ type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 export interface PythonOrgFallbackOptions {
   fetchImpl?: FetchLike;
   track: string;
+  noNetworkFallback?: boolean;
+  htmlSnapshot?: string;
 }
 
 export interface PythonOrgVersion {
@@ -36,22 +38,35 @@ function extractVersions(html: string): string[] {
 export async function fetchLatestFromPythonOrg(
   options: PythonOrgFallbackOptions,
 ): Promise<PythonOrgVersion | null> {
-  const { track, fetchImpl = defaultFetch } = options;
+  const { track, fetchImpl = defaultFetch, noNetworkFallback = false, htmlSnapshot } = options;
   const normalizedTrack = track.trim();
   if (!/^\d+\.\d+$/.test(normalizedTrack)) {
     throw new Error(`Track "${track}" must be in the form X.Y`);
   }
 
-  const response = await fetchImpl(PYTHON_RELEASES_URL, {
-    method: 'GET',
-  } satisfies RequestInit);
+  let htmlContent: string;
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch python.org releases (status ${response.status}).`);
+  if (htmlSnapshot) {
+    htmlContent = htmlSnapshot;
+  } else {
+    if (noNetworkFallback) {
+      throw new Error(
+        'Network access disabled via NO_NETWORK_FALLBACK. Provide htmlSnapshot to fetchLatestFromPythonOrg.',
+      );
+    }
+
+    const response = await fetchImpl(PYTHON_RELEASES_URL, {
+      method: 'GET',
+    } satisfies RequestInit);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch python.org releases (status ${response.status}).`);
+    }
+
+    htmlContent = await response.text();
   }
 
-  const html = await response.text();
-  const versions = extractVersions(html);
+  const versions = extractVersions(htmlContent);
 
   const candidates = versions.filter((version) => version.startsWith(`${normalizedTrack}.`));
   if (candidates.length === 0) {

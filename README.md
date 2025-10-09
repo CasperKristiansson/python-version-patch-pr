@@ -147,6 +147,18 @@ the context of a real repository:
 Each template ships with a README snippet and status badge you can adapt when
 bootstrapping your own public showcase repository.
 
+### Offline mode
+
+Set `NO_NETWORK_FALLBACK=true` and supply snapshots so the action can run without hitting
+external endpoints:
+
+- `CPYTHON_TAGS_SNAPSHOT` – JSON array of CPython tag objects.
+- `PYTHON_ORG_HTML_SNAPSHOT` – Raw HTML or path to a saved python.org releases page.
+- `RUNNER_MANIFEST_SNAPSHOT` – JSON manifest compatible with `actions/python-versions`.
+
+Each variable accepts either the data directly or a path to a file containing the snapshot. When
+offline mode is enabled and a snapshot is missing, the run will fail fast with a clear message.
+
 ---
 
 ## Permissions

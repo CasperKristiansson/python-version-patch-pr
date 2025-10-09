@@ -107,6 +107,25 @@ describe('resolveLatestPatch', () => {
     });
   });
 
+  it('throws when network is disabled and tags are missing', async () => {
+    await expect(resolveLatestPatch('3.13', { noNetworkFallback: true })).rejects.toThrow(
+      /NO_NETWORK_FALLBACK/,
+    );
+  });
+
+  it('uses provided tags when network is disabled', async () => {
+    const result = await resolveLatestPatch('3.13', {
+      noNetworkFallback: true,
+      tags: sampleTags,
+    });
+
+    expect(result).toEqual({
+      version: '3.13.2',
+      tagName: 'v3.13.2',
+      commitSha: 'sha-3-13-2',
+    });
+  });
+
   it('rejects invalid track values', async () => {
     await expect(resolveLatestPatch('3')).rejects.toThrow(/Track "3" must be in the form X.Y/);
   });

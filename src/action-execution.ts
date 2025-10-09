@@ -13,6 +13,7 @@ import {
 } from './versioning';
 import { createOrUpdatePullRequest, findExistingPullRequest, type PullRequestResult } from './git';
 import { generatePullRequestBody } from './pr-body';
+import type { StableTag } from './github';
 
 export type SkipReason =
   | 'no_matches_found'
@@ -34,6 +35,12 @@ export interface ExecuteOptions {
   repository?: { owner: string; repo: string } | null;
   defaultBranch?: string;
   allowPrCreation?: boolean;
+  noNetworkFallback?: boolean;
+  snapshots?: {
+    cpythonTags?: StableTag[];
+    pythonOrgHtml?: string;
+    runnerManifest?: unknown;
+  };
 }
 
 export interface ExecuteDependencies {
@@ -114,6 +121,8 @@ export async function executeAction(
     repository,
     defaultBranch = 'main',
     allowPrCreation = false,
+    noNetworkFallback = false,
+    snapshots,
   } = options;
 
   const scanResult = await dependencies.scanForPythonVersions({
@@ -143,8 +152,14 @@ export async function executeAction(
   const latestPatch = await dependencies.resolveLatestPatch(track, {
     includePrerelease,
     token: githubToken,
+    tags: snapshots?.cpythonTags,
+    noNetworkFallback,
   });
-  const fallback = await dependencies.fetchLatestFromPythonOrg({ track });
+  const fallback = await dependencies.fetchLatestFromPythonOrg({
+    track,
+    htmlSnapshot: snapshots?.pythonOrgHtml,
+    noNetworkFallback,
+  });
   const latestVersion = selectLatestVersion(track, latestPatch, fallback);
 
   const guard = dependencies.enforcePreReleaseGuard(includePrerelease, latestVersion);
@@ -156,7 +171,10 @@ export async function executeAction(
     } satisfies SkipResult;
   }
 
-  const availability = await dependencies.fetchRunnerAvailability(latestVersion);
+  const availability = await dependencies.fetchRunnerAvailability(latestVersion, {
+    manifestSnapshot: snapshots?.runnerManifest,
+    noNetworkFallback,
+  });
   const missingRunners = determineMissingRunners(availability);
   if (missingRunners.length > 0) {
     return {

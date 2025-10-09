@@ -30,8 +30,10 @@ External network access is limited to:
 - `www.python.org` – fallback source to confirm released patch versions.
 
 No telemetry or analytics endpoints are used. If you need to run the action in a
-restricted environment, consider mirroring the above endpoints and pointing the
-workflow to your mirrors.
+restricted environment, you can enable offline mode by setting `NO_NETWORK_FALLBACK=true`
+and providing snapshot data via `CPYTHON_TAGS_SNAPSHOT`, `PYTHON_ORG_HTML_SNAPSHOT`, and
+`RUNNER_MANIFEST_SNAPSHOT`. Each variable accepts either inline JSON/HTML or a path to a
+local file containing the snapshot data.
 
 ## Handling secrets
 

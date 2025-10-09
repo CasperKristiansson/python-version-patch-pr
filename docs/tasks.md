@@ -241,7 +241,7 @@ Use Context7 MCP for up to date documentation.
         PR body includes exact git commands.
         Verify: Snapshot contains commands with placeholders.
 
-40. [ ] **No extra telemetry**
+40. [x] **No extra telemetry**
         Only GitHub + python.org calls. Env `NO_NETWORK_FALLBACK=true` supported with injected data.
         Verify: Network-blocked tests pass using fixtures.
 

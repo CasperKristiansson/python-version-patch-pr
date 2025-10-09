@@ -74,4 +74,31 @@ describe('createBranchAndCommit', () => {
     const status = await runGit(['status', '--short'], repoDir);
     expect(status).toBe('');
   });
+
+  it('reuses existing branch when present', async () => {
+    const filePath = path.join(repoDir, 'Dockerfile');
+    await writeFile(filePath, 'FROM python:3.11.8-slim\n');
+
+    // First run creates the branch and commit.
+    await createBranchAndCommit({
+      repoPath: repoDir,
+      track: '3.11',
+      files: ['Dockerfile'],
+      commitMessage: 'chore: bump python to 3.11.9',
+    });
+
+    // Modify file again and ensure second run keeps branch without recreation errors.
+    await writeFile(filePath, 'FROM python:3.11.9-slim\n');
+
+    const result = await createBranchAndCommit({
+      repoPath: repoDir,
+      track: '3.11',
+      files: ['Dockerfile'],
+      commitMessage: 'chore: bump python to 3.11.10',
+    });
+
+    expect(result.branch).toBe('chore/bump-python-3.11');
+    const commitCount = await runGit(['rev-list', '--count', 'chore/bump-python-3.11'], repoDir);
+    expect(Number.parseInt(commitCount, 10)).toBeGreaterThanOrEqual(2);
+  });
 });

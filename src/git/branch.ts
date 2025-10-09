@@ -20,6 +20,15 @@ export interface BranchCommitResult {
   filesCommitted: string[];
 }
 
+async function branchExists(branch: string, repoPath: string): Promise<boolean> {
+  try {
+    await runGit(['show-ref', '--verify', `refs/heads/${branch}`], repoPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function runGit(
   args: string[],
   repoPath: string,
@@ -67,7 +76,11 @@ export async function createBranchAndCommit(
 
   const branch = `${branchPrefix}${track}`;
 
-  await runGit(['checkout', '-B', branch], repoPath);
+  if (await branchExists(branch, repoPath)) {
+    await runGit(['checkout', branch], repoPath);
+  } else {
+    await runGit(['checkout', '-B', branch], repoPath);
+  }
   await stageFiles(files, repoPath);
   const stagedFiles = await getStagedFiles(repoPath);
 

@@ -233,7 +233,7 @@ Use Context7 MCP for up to date documentation.
         Validate `track` as `/^\d+\.\d+$/`.
         Verify: Bad inputs fail fast.
 
-38. [ ] **Concurrency control**
+38. [x] **Concurrency control**
         Check existing ref before branch create. Document workflow `concurrency`.
         Verify: Parallel runs yield one PR.
 

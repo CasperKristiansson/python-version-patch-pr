@@ -49,7 +49,15 @@ describe('run', () => {
       if (name === 'track') return '';
       return '';
     });
-    mockGetMultilineInput.mockReturnValue([]);
+    mockGetMultilineInput.mockImplementation((name: string) => {
+      if (name === 'paths') {
+        return [];
+      }
+      if (name === 'security_keywords') {
+        return [];
+      }
+      return [];
+    });
     mockExecuteAction.mockResolvedValue({
       status: 'success',
       newVersion: '3.13.1',
@@ -64,6 +72,7 @@ describe('run', () => {
     delete process.env.CPYTHON_TAGS_SNAPSHOT;
     delete process.env.PYTHON_ORG_HTML_SNAPSHOT;
     delete process.env.RUNNER_MANIFEST_SNAPSHOT;
+    delete process.env.RELEASE_NOTES_SNAPSHOT;
   });
 
   it('uses default configuration when inputs are empty', async () => {
@@ -76,10 +85,16 @@ describe('run', () => {
     expect(mockInfo).toHaveBeenCalledWith(
       'paths (6): .github/workflows/**/*.yml, Dockerfile, **/Dockerfile, **/*.python-version, **/runtime.txt, **/pyproject.toml',
     );
+    expect(mockInfo).toHaveBeenCalledWith('security_keywords (0): (none)');
     expect(mockInfo).toHaveBeenCalledWith('automerge: false');
     expect(mockInfo).toHaveBeenCalledWith('dry_run: false');
     expect(mockInfo).toHaveBeenCalledWith('no_network_fallback: false');
-    expect(mockExecuteAction).toHaveBeenCalled();
+    expect(mockExecuteAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        securityKeywords: [],
+      }),
+      expect.any(Object),
+    );
     expect(mockSetOutput).toHaveBeenNthCalledWith(1, 'new_version', '3.13.1');
     expect(mockSetOutput).toHaveBeenNthCalledWith(
       2,
@@ -100,7 +115,9 @@ describe('run', () => {
       };
       return values[name] ?? '';
     });
-    mockGetMultilineInput.mockReturnValue(['requirements.txt']);
+    mockGetMultilineInput.mockImplementation((name: string) =>
+      name === 'paths' ? ['requirements.txt'] : [],
+    );
 
     await run();
 
@@ -109,6 +126,7 @@ describe('run', () => {
     expect(mockInfo).toHaveBeenCalledWith('automerge: true');
     expect(mockInfo).toHaveBeenCalledWith('dry_run: true');
     expect(mockInfo).toHaveBeenCalledWith('paths (1): requirements.txt');
+    expect(mockInfo).toHaveBeenCalledWith('security_keywords (0): (none)');
     expect(mockEndGroup).toHaveBeenCalled();
     expect(mockSetFailed).not.toHaveBeenCalled();
   });
@@ -194,10 +212,12 @@ describe('run', () => {
     expect(mockExecuteAction).toHaveBeenCalledWith(
       expect.objectContaining({
         noNetworkFallback: true,
+        securityKeywords: [],
         snapshots: expect.objectContaining({
           cpythonTags: expect.any(Array),
           pythonOrgHtml: '<html></html>',
           runnerManifest: expect.any(Array),
+          releaseNotes: undefined,
         }),
       }),
       expect.anything(),

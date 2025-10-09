@@ -49,6 +49,7 @@ const baseDependencies = (): ExecuteDependencies => ({
       url: undefined,
     }),
   ),
+  fetchReleaseNotes: vi.fn(async () => 'General maintenance release.'),
 });
 
 const baseOptions: ExecuteOptions = {
@@ -64,6 +65,7 @@ const baseOptions: ExecuteOptions = {
   allowPrCreation: false,
   noNetworkFallback: false,
   snapshots: undefined,
+  securityKeywords: [],
 };
 
 describe('executeAction failure modes', () => {
@@ -173,5 +175,70 @@ describe('executeAction failure modes', () => {
       expect(result.reason).toBe('pr_creation_failed');
       expect(result.details).toEqual({ message: 'boom' });
     }
+  });
+
+  it('skips when security keywords are configured but missing from release notes', async () => {
+    deps.fetchReleaseNotes = vi.fn(async () => 'Maintenance improvements only.');
+
+    const result = await executeAction(
+      {
+        ...baseOptions,
+        securityKeywords: ['security', 'cve'],
+      },
+      deps,
+    );
+
+    expect(result.status).toBe('skip');
+    if (result.status === 'skip') {
+      expect(result.reason).toBe('security_gate_blocked');
+      expect(result.details).toEqual({
+        keywords: ['security', 'cve'],
+        releaseNotesFound: true,
+      });
+    }
+  });
+
+  it('continues when release notes mention a configured security keyword', async () => {
+    deps.fetchReleaseNotes = vi.fn(async () => 'Addresses CVE-2025-1234 and improves stability.');
+
+    const result = await executeAction(
+      {
+        ...baseOptions,
+        securityKeywords: ['cve'],
+      },
+      deps,
+    );
+
+    expect(result.status).toBe('success');
+    if (result.status === 'success') {
+      expect(result.newVersion).toBe('3.13.1');
+    }
+  });
+
+  it('skips when release notes are unavailable and no-network fallback is enabled', async () => {
+    deps.fetchReleaseNotes = vi.fn(); // Should not be called when noNetworkFallback is true.
+
+    const result = await executeAction(
+      {
+        ...baseOptions,
+        noNetworkFallback: true,
+        securityKeywords: ['security'],
+        snapshots: {
+          ...baseOptions.snapshots,
+          releaseNotes: undefined,
+        },
+      },
+      deps,
+    );
+
+    expect(result.status).toBe('skip');
+    if (result.status === 'skip') {
+      expect(result.reason).toBe('security_gate_blocked');
+      expect(result.details).toEqual({
+        keywords: ['security'],
+        releaseNotesFound: false,
+      });
+    }
+    expect(deps.fetchReleaseNotes).not.toHaveBeenCalled();
   });
 });

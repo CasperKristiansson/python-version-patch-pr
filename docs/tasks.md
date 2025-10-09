@@ -247,11 +247,11 @@ Use Context7 MCP for up to date documentation.
 
 ## 10) Optional compatibility and polish
 
-41. [ ] **Renovate/Dependabot coexistence docs**
+41. [x] **Renovate/Dependabot coexistence docs**
         Provide ignore rules to avoid flapping.
         Verify: Example configs tested.
 
-42. [ ] **Security keyword gating**
+42. [x] **Security keyword gating**
         Input `security_keywords` to gate bumps by release notes.
         Verify: Mock notes trigger gate.
 

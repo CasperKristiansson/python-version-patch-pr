@@ -28,6 +28,10 @@ inputs:
     description: Skip file modifications and output the planned changes only.
     required: false
     default: 'false'
+  security_keywords:
+    description: Newline-separated keywords that must appear in the release notes before applying an update.
+    required: false
+    default: ''
 outputs:
   new_version:
     description: Resolved CPython patch version (for example 3.13.5).

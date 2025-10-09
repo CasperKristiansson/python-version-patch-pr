@@ -63,6 +63,7 @@ CPython Patch PR Action is a GitHub Action that automatically scans your reposit
 | `paths`                  | false    | _(see default globs)_ | Newline-separated glob patterns to scan.                                                |
 | `automerge`              | false    | `false`               | Label or merge the bump PR once checks pass.                                            |
 | `dry_run`                | false    | `false`               | Skip file writes and emit a change summary instead.                                     |
+| `security_keywords`      | false    | _(empty)_             | Require the release notes to contain at least one of the provided keywords before upgrading. |
 | `use_external_pr_action` | false    | `false`               | Emit outputs for `peter-evans/create-pull-request` instead of using Octokit internally. |
 
 **Default globs**
@@ -133,6 +134,33 @@ with:
 
 Set `automerge: true` and wire a follow-up job that applies your preferred automerge strategy (label-based, direct merge, etc.) based on the outputs emitted by the action.
 
+### Security keyword gate
+
+Supply `security_keywords` (one per line) to require matching terms inside the CPython release notes before applying an update. This is useful for only auto-rolling releases that contain security fixes:
+
+```yaml
+with:
+  security_keywords: |
+    CVE
+    security
+```
+
+When the keywords are provided, the action fetches the GitHub release notes for the resolved tag (or uses the optional `RELEASE_NOTES_SNAPSHOT` offline input) and skips the run unless at least one keyword is present.
+
+### Renovate/Dependabot coexistence
+
+If Renovate or Dependabot also try to bump CPython patch versions, they will race with this action
+and open competing pull requests. Use the sample configurations below to disable CPython patch bumps
+while still allowing those tools to manage other dependencies:
+
+- `examples/coexistence/renovate.json` disables patch updates for the `python` base image in Dockerfiles
+  and any custom regex managers that match CPython pins.
+- `examples/coexistence/dependabot.yml` ignores semver patch updates for the `python` Docker image
+  while keeping other ecosystems enabled.
+
+Both samples are validated by the test suite so you can copy them verbatim and adjust schedules or
+additional dependency rules as needed.
+
 ---
 
 ## Example consumer repositories
@@ -155,6 +183,7 @@ external endpoints:
 - `CPYTHON_TAGS_SNAPSHOT` – JSON array of CPython tag objects.
 - `PYTHON_ORG_HTML_SNAPSHOT` – Raw HTML or path to a saved python.org releases page.
 - `RUNNER_MANIFEST_SNAPSHOT` – JSON manifest compatible with `actions/python-versions`.
+- `RELEASE_NOTES_SNAPSHOT` – JSON object mapping tags or versions to release note strings.
 
 Each variable accepts either the data directly or a path to a file containing the snapshot. When
 offline mode is enabled and a snapshot is missing, the run will fail fast with a clear message.

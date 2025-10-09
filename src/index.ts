@@ -14,6 +14,7 @@ import {
   enforcePreReleaseGuard,
   fetchLatestFromPythonOrg,
   fetchRunnerAvailability,
+  fetchReleaseNotes,
   resolveLatestPatch,
 } from './versioning';
 import { createOrUpdatePullRequest, findExistingPullRequest } from './git';
@@ -51,6 +52,13 @@ function getBooleanInput(name: string, fallback: boolean): boolean {
 function resolvePathsInput(): string[] {
   const explicitPaths = core.getMultilineInput('paths', { trimWhitespace: true }).filter(Boolean);
   return explicitPaths.length > 0 ? explicitPaths : DEFAULT_PATHS;
+}
+
+function resolveSecurityKeywords(): string[] {
+  return core
+    .getMultilineInput('security_keywords', { trimWhitespace: true })
+    .map((keyword) => keyword.trim())
+    .filter((keyword) => keyword.length > 0);
 }
 
 function loadJsonSnapshot(envName: string): unknown | undefined {
@@ -151,6 +159,15 @@ function logSkip(result: SkipResult): void {
     case 'pre_release_guarded':
       core.info('Latest tag is a pre-release and include_prerelease is false; skipping.');
       break;
+    case 'security_gate_blocked': {
+      const configuredKeywords = Array.isArray(result.details?.keywords)
+        ? (result.details?.keywords as string[]).join(', ')
+        : 'none';
+      core.info(
+        `Release notes do not contain the configured security keywords (${configuredKeywords}); skipping.`,
+      );
+      break;
+    }
     default:
       core.info(`Skipping with reason ${result.reason}.`);
       break;
@@ -167,6 +184,7 @@ function buildDependencies(): ExecuteDependencies {
     fetchRunnerAvailability,
     findExistingPullRequest,
     createOrUpdatePullRequest,
+    fetchReleaseNotes,
   };
 }
 
@@ -204,6 +222,7 @@ export async function run(): Promise<void> {
     const automerge = getBooleanInput('automerge', false);
     const dryRun = getBooleanInput('dry_run', false);
     const effectivePaths = resolvePathsInput();
+    const securityKeywords = resolveSecurityKeywords();
 
     const workspace = process.env.GITHUB_WORKSPACE ?? process.cwd();
     const repository = parseRepository(process.env.GITHUB_REPOSITORY);
@@ -214,6 +233,7 @@ export async function run(): Promise<void> {
     let cpythonTagsSnapshot: StableTag[] | undefined;
     let pythonOrgHtmlSnapshot: string | undefined;
     let runnerManifestSnapshot: unknown | undefined;
+    let releaseNotesSnapshot: Record<string, string> | undefined;
 
     try {
       const rawTagsSnapshot = loadJsonSnapshot('CPYTHON_TAGS_SNAPSHOT');
@@ -226,6 +246,22 @@ export async function run(): Promise<void> {
 
       pythonOrgHtmlSnapshot = loadTextSnapshot('PYTHON_ORG_HTML_SNAPSHOT');
       runnerManifestSnapshot = loadJsonSnapshot('RUNNER_MANIFEST_SNAPSHOT');
+
+      const rawReleaseNotesSnapshot = loadJsonSnapshot('RELEASE_NOTES_SNAPSHOT');
+      if (rawReleaseNotesSnapshot !== undefined) {
+        if (typeof rawReleaseNotesSnapshot !== 'object' || rawReleaseNotesSnapshot === null) {
+          throw new Error('RELEASE_NOTES_SNAPSHOT must be a JSON object mapping versions or tags to release note strings.');
+        }
+
+        const entries = Object.entries(rawReleaseNotesSnapshot as Record<string, unknown>);
+        for (const [, value] of entries) {
+          if (typeof value !== 'string') {
+            throw new Error('RELEASE_NOTES_SNAPSHOT values must be strings.');
+          }
+        }
+
+        releaseNotesSnapshot = Object.fromEntries(entries) as Record<string, string>;
+      }
     } catch (snapshotError) {
       if (snapshotError instanceof Error) {
         core.setFailed(snapshotError.message);
@@ -240,6 +276,9 @@ export async function run(): Promise<void> {
     core.info(`track: ${validatedTrack}`);
     core.info(`include_prerelease: ${includePrerelease}`);
     core.info(`paths (${effectivePaths.length}): ${effectivePaths.join(', ')}`);
+    core.info(
+      `security_keywords (${securityKeywords.length}): ${securityKeywords.length > 0 ? securityKeywords.join(', ') : '(none)'}`,
+    );
     core.info(`automerge: ${automerge}`);
     core.info(`dry_run: ${dryRun}`);
     core.info(`no_network_fallback: ${noNetworkFallback}`);
@@ -267,10 +306,12 @@ export async function run(): Promise<void> {
         defaultBranch,
         allowPrCreation: false,
         noNetworkFallback,
+        securityKeywords,
         snapshots: {
           cpythonTags: cpythonTagsSnapshot,
           pythonOrgHtml: pythonOrgHtmlSnapshot,
           runnerManifest: runnerManifestSnapshot,
+          releaseNotes: releaseNotesSnapshot,
         },
       },
       dependencies,

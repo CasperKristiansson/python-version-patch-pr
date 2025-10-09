@@ -9,3 +9,6 @@ export type { RunnerAvailability, RunnerAvailabilityOptions } from './runner-ava
 
 export { enforcePreReleaseGuard } from './pre-release-guard';
 export type { PreReleaseGuardResult } from './pre-release-guard';
+
+export { fetchReleaseNotes } from './release-notes';
+export type { FetchReleaseNotesOptions } from './release-notes';

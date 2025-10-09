@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "description": "Let python-version-patch-pr handle CPython patch bumps found in Dockerfiles and regex managers",
+      "matchManagers": ["dockerfile", "regex"],
+      "matchPackagePatterns": ["^python$"],
+      "matchUpdateTypes": ["patch"],
+      "enabled": false
+    }
+  ]
+}

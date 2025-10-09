@@ -8,6 +8,7 @@ import {
   enforcePreReleaseGuard,
   fetchLatestFromPythonOrg,
   fetchRunnerAvailability,
+  fetchReleaseNotes,
   resolveLatestPatch,
   type LatestPatchResult,
 } from './versioning';
@@ -22,7 +23,8 @@ export type SkipReason =
   | 'already_latest'
   | 'pr_exists'
   | 'pr_creation_failed'
-  | 'pre_release_guarded';
+  | 'pre_release_guarded'
+  | 'security_gate_blocked';
 
 export interface ExecuteOptions {
   workspace: string;
@@ -36,10 +38,12 @@ export interface ExecuteOptions {
   defaultBranch?: string;
   allowPrCreation?: boolean;
   noNetworkFallback?: boolean;
+  securityKeywords?: string[];
   snapshots?: {
     cpythonTags?: StableTag[];
     pythonOrgHtml?: string;
     runnerManifest?: unknown;
+    releaseNotes?: Record<string, string>;
   };
 }
 
@@ -52,6 +56,7 @@ export interface ExecuteDependencies {
   fetchRunnerAvailability: typeof fetchRunnerAvailability;
   findExistingPullRequest?: typeof findExistingPullRequest;
   createOrUpdatePullRequest?: typeof createOrUpdatePullRequest;
+  fetchReleaseNotes?: typeof fetchReleaseNotes;
 }
 
 export interface SkipResult {
@@ -122,6 +127,7 @@ export async function executeAction(
     defaultBranch = 'main',
     allowPrCreation = false,
     noNetworkFallback = false,
+    securityKeywords = [],
     snapshots,
   } = options;
 
@@ -169,6 +175,73 @@ export async function executeAction(
       reason: guard.reason ?? 'pre_release_guarded',
       newVersion: latestVersion,
     } satisfies SkipResult;
+  }
+
+  const normalizedSecurityKeywords = securityKeywords
+    .map((keyword) => keyword.trim())
+    .filter((keyword) => keyword.length > 0);
+
+  if (normalizedSecurityKeywords.length > 0) {
+    const releaseNotesLookup = snapshots?.releaseNotes;
+    const releaseNotesFromSnapshot =
+      releaseNotesLookup &&
+      [latestPatch?.tagName, `v${latestVersion}`, latestVersion].reduce<string | undefined>(
+        (acc, key) => {
+          if (acc) {
+            return acc;
+          }
+          if (!key) {
+            return undefined;
+          }
+          const direct = releaseNotesLookup[key];
+          if (typeof direct === 'string') {
+            return direct;
+          }
+          return undefined;
+        },
+        undefined,
+      );
+
+    let releaseNotesText = releaseNotesFromSnapshot;
+    let releaseNotesFound = releaseNotesText != null;
+
+    if (!releaseNotesText && !noNetworkFallback && dependencies.fetchReleaseNotes) {
+      const tagForNotes = latestPatch?.tagName ?? `v${latestVersion}`;
+      releaseNotesText =
+        (await dependencies.fetchReleaseNotes(tagForNotes, {
+          token: githubToken,
+        })) ?? undefined;
+      releaseNotesFound = releaseNotesText != null;
+    }
+
+    if (releaseNotesText == null) {
+      return {
+        status: 'skip',
+        reason: 'security_gate_blocked',
+        newVersion: latestVersion,
+        details: {
+          keywords: normalizedSecurityKeywords,
+          releaseNotesFound,
+        },
+      } satisfies SkipResult;
+    }
+
+    const lowerCaseNotes = releaseNotesText.toLowerCase();
+    const matchedKeyword = normalizedSecurityKeywords.find((keyword) =>
+      lowerCaseNotes.includes(keyword.toLowerCase()),
+    );
+
+    if (!matchedKeyword) {
+      return {
+        status: 'skip',
+        reason: 'security_gate_blocked',
+        newVersion: latestVersion,
+        details: {
+          keywords: normalizedSecurityKeywords,
+          releaseNotesFound: true,
+        },
+      } satisfies SkipResult;
+    }
   }
 
   const availability = await dependencies.fetchRunnerAvailability(latestVersion, {

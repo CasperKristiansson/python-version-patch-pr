@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "python"
+        update-types:
+          - "version-update:semver-patch"
+    # CPython patch bumps are managed by python-version-patch-pr
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

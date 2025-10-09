@@ -207,11 +207,11 @@ Use Context7 MCP for up to date documentation.
 
 ## 8) Build, bundle, release
 
-32. [ ] **Bundle with ncc and commit `dist/`**
+32. [x] **Bundle with ncc and commit `dist/`**
         `ncc build src/index.ts -o dist`.
         Verify: `dist/index.js` runs. No dynamic requires.
 
-33. [ ] **Release workflow**
+33. [x] **Release workflow**
         Tag `v0.1.0`. Maintain moving `v1`.
         Verify: Tags and Marketplace listing live.
 

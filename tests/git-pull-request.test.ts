@@ -1,4 +1,17 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const octokitModule = vi.hoisted(() => {
+  const list = vi.fn();
+  const create = vi.fn();
+  const update = vi.fn();
+  const Octokit = vi.fn().mockImplementation(() => ({ pulls: { list, create, update } }));
+  return { Octokit, list, create, update };
+});
+
+vi.mock('@octokit/rest', () => ({
+  __esModule: true,
+  Octokit: octokitModule.Octokit,
+}));
 
 import { createOrUpdatePullRequest, type OctokitClient, type PullRequestOptions } from '../src/git';
 
@@ -32,6 +45,10 @@ const baseOptions: PullRequestOptions = {
 };
 
 describe('createOrUpdatePullRequest', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('creates a new pull request when none exist', async () => {
     const { client, list, create } = createClient();
     list.mockResolvedValue({ data: [] });
@@ -96,5 +113,18 @@ describe('createOrUpdatePullRequest', () => {
     expect(second.action).toBe('updated');
     expect(create).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('instantiates Octokit when no client is provided', async () => {
+    octokitModule.list.mockResolvedValue({ data: [] });
+    octokitModule.create.mockResolvedValue({ data: { number: 5, html_url: undefined } });
+
+    const result = await createOrUpdatePullRequest(baseOptions);
+
+    expect(octokitModule.Octokit).toHaveBeenCalledWith({
+      auth: 'token',
+      userAgent: 'python-version-patch-pr/0.1.0',
+    });
+    expect(result).toEqual({ action: 'created', number: 5, url: undefined });
   });
 });

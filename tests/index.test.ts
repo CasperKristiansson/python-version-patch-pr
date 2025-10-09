@@ -74,4 +74,32 @@ describe('run', () => {
     expect(mockEndGroup).toHaveBeenCalled();
     expect(mockSetFailed).not.toHaveBeenCalled();
   });
+
+  it('warns and falls back when boolean input is unexpected', async () => {
+    mockGetInput.mockImplementation((name: string) => {
+      const values: Record<string, string> = {
+        include_prerelease: 'not-a-bool',
+        automerge: '',
+        dry_run: '',
+        track: '',
+      };
+      return values[name] ?? '';
+    });
+
+    await run();
+
+    expect(mockWarning).toHaveBeenCalledWith(
+      'Input "include_prerelease" received unexpected value "not-a-bool". Falling back to false.',
+    );
+  });
+
+  it('reports failures when unexpected errors occur', async () => {
+    mockInfo.mockImplementationOnce(() => {
+      throw new Error('run failure');
+    });
+
+    await run();
+
+    expect(mockSetFailed).toHaveBeenCalledWith('run failure');
+  });
 });

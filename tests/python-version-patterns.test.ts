@@ -90,4 +90,12 @@ describe('findPythonVersionMatches', () => {
 
     expect(matches).toHaveLength(0);
   });
+
+  it('computes accurate positions for CRLF encoded files', () => {
+    const content = 'FROM python:3.12.4-slim\r\nARG PYTHON_VERSION="3.12.4"\r\n';
+    const matches = findPythonVersionMatches('Dockerfile', content);
+
+    expect(matches[0]).toMatchObject({ line: 1, column: 13 });
+    expect(matches[1]).toMatchObject({ line: 2, column: 21 });
+  });
 });

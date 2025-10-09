@@ -57,4 +57,15 @@ describe('fetchStableCpythonTags', () => {
       /Unexpected payload/,
     );
   });
+
+  it('stops pagination when page has no stable tags', async () => {
+    const fetchMock = vi.fn(async () =>
+      createResponse([{ name: 'v3.13.0a1', commit: { sha: 'sha' } }]),
+    );
+
+    const tags = await fetchStableCpythonTags({ perPage: 1, fetchImpl: fetchMock });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(tags).toEqual([]);
+  });
 });

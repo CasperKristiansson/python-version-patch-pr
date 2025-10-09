@@ -56,14 +56,14 @@ CPython Patch PR Action is a GitHub Action that automatically scans your reposit
 
 ## Inputs
 
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `track` | false | `3.13` | CPython minor series to monitor (e.g. `3.12`). |
-| `include_prerelease` | false | `false` | Allow `rc`, `a`, or `b` releases when determining the latest patch. |
-| `paths` | false | *(see default globs)* | Newline-separated glob patterns to scan. |
-| `automerge` | false | `false` | Label or merge the bump PR once checks pass. |
-| `dry_run` | false | `false` | Skip file writes and emit a change summary instead. |
-| `use_external_pr_action` | false | `false` | Emit outputs for `peter-evans/create-pull-request` instead of using Octokit internally. |
+| Input                    | Required | Default               | Description                                                                             |
+| ------------------------ | -------- | --------------------- | --------------------------------------------------------------------------------------- |
+| `track`                  | false    | `3.13`                | CPython minor series to monitor (e.g. `3.12`).                                          |
+| `include_prerelease`     | false    | `false`               | Allow `rc`, `a`, or `b` releases when determining the latest patch.                     |
+| `paths`                  | false    | _(see default globs)_ | Newline-separated glob patterns to scan.                                                |
+| `automerge`              | false    | `false`               | Label or merge the bump PR once checks pass.                                            |
+| `dry_run`                | false    | `false`               | Skip file writes and emit a change summary instead.                                     |
+| `use_external_pr_action` | false    | `false`               | Emit outputs for `peter-evans/create-pull-request` instead of using Octokit internally. |
 
 **Default globs**
 
@@ -80,10 +80,10 @@ Dockerfile
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
-| `new_version` | Highest CPython patch identified during the run. |
-| `files_changed` | JSON array of files rewritten. |
+| Output           | Description                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `new_version`    | Highest CPython patch identified during the run.                                                                           |
+| `files_changed`  | JSON array of files rewritten.                                                                                             |
 | `skipped_reason` | Machine-readable reason when no PR is created (`already_latest`, `multiple_tracks_detected`, `pre_release_guarded`, etc.). |
 
 ---

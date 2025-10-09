@@ -23,6 +23,12 @@ describe('enforcePreReleaseGuard', () => {
     expect(result.allowed).toBe(true);
   });
 
+  it('allows strings that cannot be parsed as versions', () => {
+    const result = enforcePreReleaseGuard(false, 'invalid-version');
+
+    expect(result.allowed).toBe(true);
+  });
+
   it('allows when version is null', () => {
     const result = enforcePreReleaseGuard(false, null);
 

@@ -172,20 +172,20 @@ Use Context7 MCP for up to date documentation.
         Verify: `actionlint` validates examples.
 
 24. [x] **CHANGELOG and versioning**
-       Keep `CHANGELOG.md`. Plan `v0.x` then `v1`.
-       Verify: Release notes generated on tag.
+        Keep `CHANGELOG.md`. Plan `v0.x` then `v1`.
+        Verify: Release notes generated on tag.
 
 25. [x] **Action icon and color**
-       Update `action.yml` branding.
-       Verify: Marketplace shows branding.
+        Update `action.yml` branding.
+        Verify: Marketplace shows branding.
 
 26. [x] **Security model doc**
-       Explain permissions, tokens, network endpoints.
-       Verify: `SECURITY.md` updated.
+        Explain permissions, tokens, network endpoints.
+        Verify: `SECURITY.md` updated.
 
 ## 7) Testing matrix
 
-27. [ ] **Unit tests full coverage**
+27. [x] **Unit tests full coverage**
         Cover fetchers, parsers, matchers, rewriter, PR logic (mocked).
         Verify: Coverage ≥ 90%.
 

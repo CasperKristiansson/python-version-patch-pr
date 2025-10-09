@@ -2,7 +2,7 @@ name: Sandbox Nightly E2E
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 3 * * 1'
   workflow_dispatch:
 
 jobs:
@@ -49,14 +49,14 @@ jobs:
       - name: Bundle action
         if: steps.check.outputs.configured == 'true'
         run: npm run bundle
-      - name: Clone sandbox repository
+      - name: Checkout sandbox repository
         if: steps.check.outputs.configured == 'true'
-        env:
-          TARGET_BRANCH: ${{ steps.check.outputs.branch }}
-        run: |
-          git clone https://x-access-token:${SANDBOX_TOKEN}@github.com/${SANDBOX_REPO}.git sandbox
-          cd sandbox
-          git checkout "$TARGET_BRANCH"
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SANDBOX_REPO }}
+          ref: ${{ steps.check.outputs.branch }}
+          path: sandbox
+          token: ${{ secrets.SANDBOX_TOKEN }}
       - name: Run CPython Patch PR Action
         id: bump
         if: steps.check.outputs.configured == 'true'
@@ -65,9 +65,10 @@ jobs:
           track: ${{ steps.check.outputs.track }}
           dry_run: false
           automerge: ${{ steps.check.outputs.automerge }}
+          paths: |
+            sandbox/**
         env:
           GITHUB_TOKEN: ${{ secrets.SANDBOX_TOKEN }}
-        working-directory: sandbox
       - name: Summarize run
         if: steps.check.outputs.configured == 'true'
         env:

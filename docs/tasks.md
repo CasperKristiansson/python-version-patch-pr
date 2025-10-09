@@ -197,7 +197,7 @@ Use Context7 MCP for up to date documentation.
        Upload `GITHUB_STEP_SUMMARY` artifacts.
        Verify: Artifacts contain expected diffs.
 
-30. [ ] **E2E sandbox nightly**
+30. [x] **E2E sandbox nightly**
         Nightly scheduled PR cycle in a sandbox repo.
         Verify: PR created and closes as expected.
 

@@ -225,7 +225,7 @@ Use Context7 MCP for up to date documentation.
 
 ## 9) Quality and guardrails
 
-36. [ ] **Failure modes and messages**
+36. [x] **Failure modes and messages**
         Emit `multiple_tracks_detected`, `runners_missing`, `no_matches_found`, `already_latest`, `pr_exists`, `pr_creation_failed`.
         Verify: Tests assert outputs and logs.
 

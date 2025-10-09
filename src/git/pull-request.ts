@@ -108,3 +108,29 @@ export async function createOrUpdatePullRequest(
 
   return { action: 'created', number: response.data.number, url: response.data.html_url };
 }
+
+export async function findExistingPullRequest(options: {
+  owner: string;
+  repo: string;
+  head: string;
+  authToken: string;
+  client?: OctokitClient;
+}): Promise<{ number: number; url?: string } | null> {
+  const { owner, repo, head, authToken, client } = options;
+  const octokit = client ?? createClient(authToken);
+
+  const { data } = await octokit.pulls.list({
+    owner,
+    repo,
+    head: `${owner}:${head}`,
+    state: 'open',
+    per_page: 1,
+  });
+
+  if (data.length === 0) {
+    return null;
+  }
+
+  const pull = data[0];
+  return { number: pull.number, url: pull.html_url };
+}

@@ -11,7 +11,14 @@ const coreMocks = vi.hoisted(() => ({
   warning: vi.fn(),
 }));
 
+const actionExecutionMocks = vi.hoisted(() => ({
+  executeAction: vi.fn(),
+}));
+
 vi.mock('@actions/core', () => coreMocks);
+vi.mock('../src/action-execution', () => ({
+  executeAction: actionExecutionMocks.executeAction,
+}));
 
 const mockGetInput = coreMocks.getInput;
 const mockGetMultilineInput = coreMocks.getMultilineInput;
@@ -21,6 +28,7 @@ const mockEndGroup = coreMocks.endGroup;
 const mockSetOutput = coreMocks.setOutput;
 const mockSetFailed = coreMocks.setFailed;
 const mockWarning = coreMocks.warning;
+const mockExecuteAction = actionExecutionMocks.executeAction as ReturnType<typeof vi.fn>;
 
 import { run } from '../src/index';
 
@@ -32,6 +40,12 @@ describe('run', () => {
       return '';
     });
     mockGetMultilineInput.mockReturnValue([]);
+    mockExecuteAction.mockResolvedValue({
+      status: 'success',
+      newVersion: '3.13.1',
+      filesChanged: ['Dockerfile'],
+      dryRun: true,
+    });
   });
 
   it('uses default configuration when inputs are empty', async () => {
@@ -46,9 +60,14 @@ describe('run', () => {
     );
     expect(mockInfo).toHaveBeenCalledWith('automerge: false');
     expect(mockInfo).toHaveBeenCalledWith('dry_run: false');
-    expect(mockSetOutput).toHaveBeenNthCalledWith(1, 'new_version', '');
-    expect(mockSetOutput).toHaveBeenNthCalledWith(2, 'files_changed', '[]');
-    expect(mockSetOutput).toHaveBeenNthCalledWith(3, 'skipped_reason', 'not_implemented');
+    expect(mockExecuteAction).toHaveBeenCalled();
+    expect(mockSetOutput).toHaveBeenNthCalledWith(1, 'new_version', '3.13.1');
+    expect(mockSetOutput).toHaveBeenNthCalledWith(
+      2,
+      'files_changed',
+      JSON.stringify(['Dockerfile']),
+    );
+    expect(mockSetOutput).toHaveBeenNthCalledWith(3, 'skipped_reason', '');
     expect(mockWarning).not.toHaveBeenCalled();
   });
 
@@ -93,10 +112,23 @@ describe('run', () => {
     );
   });
 
-  it('reports failures when unexpected errors occur', async () => {
-    mockInfo.mockImplementationOnce(() => {
-      throw new Error('run failure');
+  it('propagates skipped reasons to outputs', async () => {
+    mockExecuteAction.mockResolvedValueOnce({
+      status: 'skip',
+      reason: 'no_matches_found',
+      filesChanged: [],
+      newVersion: '',
     });
+
+    await run();
+
+    expect(mockSetOutput).toHaveBeenNthCalledWith(1, 'new_version', '');
+    expect(mockSetOutput).toHaveBeenNthCalledWith(2, 'files_changed', '[]');
+    expect(mockSetOutput).toHaveBeenNthCalledWith(3, 'skipped_reason', 'no_matches_found');
+  });
+
+  it('reports failures when unexpected errors occur', async () => {
+    mockExecuteAction.mockRejectedValueOnce(new Error('run failure'));
 
     await run();
 

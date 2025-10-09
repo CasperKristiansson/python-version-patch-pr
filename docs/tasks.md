@@ -175,13 +175,13 @@ Use Context7 MCP for up to date documentation.
        Keep `CHANGELOG.md`. Plan `v0.x` then `v1`.
        Verify: Release notes generated on tag.
 
-25. [ ] **Action icon and color**
-        Update `action.yml` branding.
-        Verify: Marketplace shows branding.
+25. [x] **Action icon and color**
+       Update `action.yml` branding.
+       Verify: Marketplace shows branding.
 
-26. [ ] **Security model doc**
-        Explain permissions, tokens, network endpoints.
-        Verify: `SECURITY.md` updated.
+26. [x] **Security model doc**
+       Explain permissions, tokens, network endpoints.
+       Verify: `SECURITY.md` updated.
 
 ## 7) Testing matrix
 

@@ -135,6 +135,20 @@ Set `automerge: true` and wire a follow-up job that applies your preferred autom
 
 ---
 
+## Example consumer repositories
+
+Clone one of the templates in [`examples/`](examples) to see the action running in
+the context of a real repository:
+
+- [`examples/minimal`](examples/minimal) – single-job workflow scheduled weekly.
+- [`examples/guarded`](examples/guarded) – dry-run preview with release-note
+  gating and concurrency controls.
+
+Each template ships with a README snippet and status badge you can adapt when
+bootstrapping your own public showcase repository.
+
+---
+
 ## Permissions
 
 The workflow requires:

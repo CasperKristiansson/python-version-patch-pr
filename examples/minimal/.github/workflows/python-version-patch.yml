@@ -1,0 +1,23 @@
+name: CPython Patch PR
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday at 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  bump-python:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update CPython patch versions
+        uses: casperkristiansson/python-version-patch-pr@v0
+        with:
+          track: '3.12'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

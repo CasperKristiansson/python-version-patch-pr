@@ -219,7 +219,7 @@ Use Context7 MCP for up to date documentation.
         Enable `codeql-analysis`. Attach provenance to releases.
         Verify: CodeQL green. Provenance present.
 
-35. [ ] **Example consumer repos**
+35. [x] **Example consumer repos**
         Public minimal and guarded samples using the Action.
         Verify: Badges and scheduled runs visible.
 

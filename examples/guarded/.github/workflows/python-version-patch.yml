@@ -1,0 +1,101 @@
+name: CPython Patch PR (Guarded)
+
+on:
+  schedule:
+    - cron: '15 7 * * 1-5' # Weekdays at 07:15 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: python-version-patch
+  cancel-in-progress: false
+
+env:
+  TRACK: '3.13'
+  SECURITY_KEYWORDS: 'security,CVE,critical'
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      new_version: ${{ steps.preview.outputs.new_version }}
+      files_changed: ${{ steps.preview.outputs.files_changed }}
+      skipped_reason: ${{ steps.preview.outputs.skipped_reason }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Preview CPython patch diff
+        id: preview
+        uses: casperkristiansson/python-version-patch-pr@v0
+        with:
+          track: ${{ env.TRACK }}
+          dry_run: true
+
+      - name: Summarize planned changes
+        if: steps.preview.outputs.skipped_reason == ''
+        run: |
+          echo "Found proposed bump to version: ${{ steps.preview.outputs.new_version }}"
+          echo "Files changed JSON:"
+          echo '${{ steps.preview.outputs.files_changed }}'
+
+  apply:
+    needs: preview
+    if: needs.preview.outputs.skipped_reason == ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    environment:
+      name: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enforce release note guard
+        env:
+          NEW_VERSION: ${{ needs.preview.outputs.new_version }}
+          SECURITY_KEYWORDS: ${{ env.SECURITY_KEYWORDS }}
+        run: |
+          if [[ -z "$NEW_VERSION" ]]; then
+            echo "No new version detected; skipping guard."
+            exit 0
+          fi
+
+          python - <<'PY'
+import os
+import sys
+import urllib.request
+
+version = os.environ['NEW_VERSION']
+keywords = [kw.strip().lower() for kw in os.environ.get('SECURITY_KEYWORDS', '').split(',') if kw.strip()]
+if not keywords:
+    sys.exit(0)
+
+slug = 'python-' + version.replace('.', '')
+url = f'https://www.python.org/downloads/release/{slug}/'
+print(f'Fetching release notes from {url}')
+try:
+    with urllib.request.urlopen(url, timeout=30) as response:
+        body = response.read().decode('utf-8', errors='replace').lower()
+except Exception as exc:  # noqa: BLE001
+    print(f'Failed to fetch release notes: {exc}')
+    sys.exit(1)
+
+if any(keyword in body for keyword in keywords):
+    print('Security keyword detected in release notes.')
+else:
+    print('No security keywords found; aborting update.')
+    sys.exit(1)
+PY
+
+      - name: Apply CPython patch update
+        uses: casperkristiansson/python-version-patch-pr@v0
+        with:
+          track: ${{ env.TRACK }}
+          automerge: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,84 @@
+name: Sandbox Nightly E2E
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  nightly-pr:
+    runs-on: ubuntu-latest
+    env:
+      SANDBOX_REPO: ${{ secrets.SANDBOX_REPO }}
+      SANDBOX_TOKEN: ${{ secrets.SANDBOX_TOKEN }}
+    steps:
+      - name: Check sandbox configuration
+        id: check
+        env:
+          SANDBOX_TRACK: ${{ vars.SANDBOX_TRACK }}
+          SANDBOX_DEFAULT_BRANCH: ${{ vars.SANDBOX_DEFAULT_BRANCH }}
+          SANDBOX_AUTOMERGE: ${{ vars.SANDBOX_AUTOMERGE }}
+        run: |
+          if [ -z "${SANDBOX_REPO}" ] || [ -z "${SANDBOX_TOKEN}" ]; then
+            echo "### Sandbox nightly" >> "$GITHUB_STEP_SUMMARY"
+            echo "Sandbox secrets are not configured so the nightly run was skipped." >> "$GITHUB_STEP_SUMMARY"
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          TRACK=${SANDBOX_TRACK:-3.11}
+          BRANCH=${SANDBOX_DEFAULT_BRANCH:-main}
+          AUTOMERGE=${SANDBOX_AUTOMERGE:-false}
+
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+          echo "track=$TRACK" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "automerge=$AUTOMERGE" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.configured == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.configured == 'true'
+        with:
+          node-version: 20
+      - name: Install dependencies
+        if: steps.check.outputs.configured == 'true'
+        run: npm ci
+      - name: Build TypeScript
+        if: steps.check.outputs.configured == 'true'
+        run: npm run build
+      - name: Bundle action
+        if: steps.check.outputs.configured == 'true'
+        run: npm run bundle
+      - name: Clone sandbox repository
+        if: steps.check.outputs.configured == 'true'
+        env:
+          TARGET_BRANCH: ${{ steps.check.outputs.branch }}
+        run: |
+          git clone https://x-access-token:${SANDBOX_TOKEN}@github.com/${SANDBOX_REPO}.git sandbox
+          cd sandbox
+          git checkout "$TARGET_BRANCH"
+      - name: Run CPython Patch PR Action
+        id: bump
+        if: steps.check.outputs.configured == 'true'
+        uses: ./
+        with:
+          track: ${{ steps.check.outputs.track }}
+          dry_run: false
+          automerge: ${{ steps.check.outputs.automerge }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SANDBOX_TOKEN }}
+        working-directory: sandbox
+      - name: Summarize run
+        if: steps.check.outputs.configured == 'true'
+        env:
+          TARGET_BRANCH: ${{ steps.check.outputs.branch }}
+          TARGET_TRACK: ${{ steps.check.outputs.track }}
+          TARGET_AUTOMERGE: ${{ steps.check.outputs.automerge }}
+        run: |
+          echo "### Sandbox nightly" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Repository: ${SANDBOX_REPO}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: ${TARGET_BRANCH}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Track: ${TARGET_TRACK}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Automerge: ${TARGET_AUTOMERGE}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Files changed: ${{ steps.bump.outputs.files_changed }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Skipped reason: ${{ steps.bump.outputs.skipped_reason }}" >> "$GITHUB_STEP_SUMMARY"

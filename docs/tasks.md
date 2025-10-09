@@ -255,7 +255,7 @@ Use Context7 MCP for up to date documentation.
         Input `security_keywords` to gate bumps by release notes.
         Verify: Mock notes trigger gate.
 
-43. [ ] **Matrix output for CI**
+43. [x] **Matrix output for CI**
         Output JSON of changed files and new version.
         Verify: Example consumes output.
 

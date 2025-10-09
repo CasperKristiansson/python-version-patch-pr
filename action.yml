@@ -37,6 +37,8 @@ outputs:
     description: Resolved CPython patch version (for example 3.13.5).
   files_changed:
     description: JSON array listing files that were updated.
+  change_matrix:
+    description: JSON object suitable for GitHub Actions matrix with changed files and new version.
   skipped_reason:
     description: Machine-readable reason describing why no update was applied.
 runs:

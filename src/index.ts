@@ -250,7 +250,9 @@ export async function run(): Promise<void> {
       const rawReleaseNotesSnapshot = loadJsonSnapshot('RELEASE_NOTES_SNAPSHOT');
       if (rawReleaseNotesSnapshot !== undefined) {
         if (typeof rawReleaseNotesSnapshot !== 'object' || rawReleaseNotesSnapshot === null) {
-          throw new Error('RELEASE_NOTES_SNAPSHOT must be a JSON object mapping versions or tags to release note strings.');
+          throw new Error(
+            'RELEASE_NOTES_SNAPSHOT must be a JSON object mapping versions or tags to release note strings.',
+          );
         }
 
         const entries = Object.entries(rawReleaseNotesSnapshot as Record<string, unknown>);
@@ -319,15 +321,27 @@ export async function run(): Promise<void> {
 
     summarizeResult(result);
 
+    const matrixOutput =
+      result.status === 'success'
+        ? {
+            include: result.filesChanged.map((file) => ({
+              file,
+              new_version: result.newVersion,
+            })),
+          }
+        : { include: [] as Array<Record<string, string>> };
+
     if (result.status === 'success') {
       core.setOutput('new_version', result.newVersion);
       core.setOutput('files_changed', JSON.stringify(result.filesChanged));
+      core.setOutput('change_matrix', JSON.stringify(matrixOutput));
       core.setOutput('skipped_reason', '');
       return;
     }
 
     core.setOutput('new_version', result.newVersion ?? '');
     core.setOutput('files_changed', JSON.stringify(result.filesChanged ?? []));
+    core.setOutput('change_matrix', JSON.stringify(matrixOutput));
     core.setOutput('skipped_reason', result.reason);
   } catch (error) {
     if (error instanceof Error) {

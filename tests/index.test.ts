@@ -101,7 +101,12 @@ describe('run', () => {
       'files_changed',
       JSON.stringify(['Dockerfile']),
     );
-    expect(mockSetOutput).toHaveBeenNthCalledWith(3, 'skipped_reason', '');
+    expect(mockSetOutput).toHaveBeenNthCalledWith(
+      3,
+      'change_matrix',
+      JSON.stringify({ include: [{ file: 'Dockerfile', new_version: '3.13.1' }] }),
+    );
+    expect(mockSetOutput).toHaveBeenNthCalledWith(4, 'skipped_reason', '');
     expect(mockWarning).not.toHaveBeenCalled();
   });
 
@@ -161,7 +166,12 @@ describe('run', () => {
 
     expect(mockSetOutput).toHaveBeenNthCalledWith(1, 'new_version', '');
     expect(mockSetOutput).toHaveBeenNthCalledWith(2, 'files_changed', '[]');
-    expect(mockSetOutput).toHaveBeenNthCalledWith(3, 'skipped_reason', 'no_matches_found');
+    expect(mockSetOutput).toHaveBeenNthCalledWith(
+      3,
+      'change_matrix',
+      JSON.stringify({ include: [] }),
+    );
+    expect(mockSetOutput).toHaveBeenNthCalledWith(4, 'skipped_reason', 'no_matches_found');
   });
 
   it('reports failures when unexpected errors occur', async () => {

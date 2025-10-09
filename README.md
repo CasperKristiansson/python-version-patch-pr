@@ -85,6 +85,7 @@ Dockerfile
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `new_version`    | Highest CPython patch identified during the run.                                                                           |
 | `files_changed`  | JSON array of files rewritten.                                                                                             |
+| `change_matrix`  | JSON object suitable for `strategy.matrix` fan-out (entries contain `file` and `new_version`).                             |
 | `skipped_reason` | Machine-readable reason when no PR is created (`already_latest`, `multiple_tracks_detected`, `pre_release_guarded`, etc.). |
 
 ---
@@ -146,6 +147,32 @@ with:
 ```
 
 When the keywords are provided, the action fetches the GitHub release notes for the resolved tag (or uses the optional `RELEASE_NOTES_SNAPSHOT` offline input) and skips the run unless at least one keyword is present.
+
+### Matrix fan-out for CI
+
+Use the `change_matrix` output to drive follow-up jobs that need to iterate over the files touched by the upgrade:
+
+```yaml
+jobs:
+  bump-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: bump
+        uses: casperkristiansson/python-version-patch-pr@v0
+
+  targeted-tests:
+    needs: bump-python
+    if: ${{ needs.bump-python.outputs.skipped_reason == '' }}
+    strategy:
+      matrix: ${{ fromJSON(needs.bump-python.outputs.change_matrix) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm test -- ${{ matrix.file }}
+```
+
+Each matrix entry exposes `matrix.file` and `matrix.new_version`, enabling you to scope lint or test jobs to the files rewritten during the patch.
 
 ### Renovate/Dependabot coexistence
 

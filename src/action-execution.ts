@@ -12,6 +12,7 @@ import {
   type LatestPatchResult,
 } from './versioning';
 import { createOrUpdatePullRequest, findExistingPullRequest, type PullRequestResult } from './git';
+import { generatePullRequestBody } from './pr-body';
 
 export type SkipReason =
   | 'no_matches_found'
@@ -231,13 +232,21 @@ export async function executeAction(
   }
 
   try {
+    const prBody = generatePullRequestBody({
+      track,
+      newVersion: latestVersion,
+      filesChanged,
+      branchName,
+      defaultBranch,
+    });
+
     const pullRequest = await dependencies.createOrUpdatePullRequest({
       owner: repository.owner,
       repo: repository.repo,
       head: branchName,
       base: defaultBranch,
       title: `chore: bump python ${track} to ${latestVersion}`,
-      body: `Update CPython ${track} pins to ${latestVersion}.`,
+      body: prBody,
       authToken: githubToken,
     });
 

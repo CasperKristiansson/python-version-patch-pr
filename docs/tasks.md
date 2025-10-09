@@ -237,7 +237,7 @@ Use Context7 MCP for up to date documentation.
         Check existing ref before branch create. Document workflow `concurrency`.
         Verify: Parallel runs yield one PR.
 
-39. [ ] **Rollback instructions generator**
+39. [x] **Rollback instructions generator**
         PR body includes exact git commands.
         Verify: Snapshot contains commands with placeholders.
 

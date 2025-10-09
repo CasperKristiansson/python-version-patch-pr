@@ -6,21 +6,17 @@ The project follows [Semantic Versioning](https://semver.org/) and adheres to th
 
 ## [Unreleased]
 
+- Nothing yet.
+
+## [1.0.0] - 2025-02-14
+
 ### Added
 
-- GitHub Action scaffold with TypeScript build, lint, test, and bundling pipelines.
-- Metadata inputs for `track`, `include_prerelease`, `paths`, `automerge`, `dry_run`,
-  and optional external PR support.
-- Version discovery modules covering CPython tag fetchers, python.org fallback,
-  runner availability checks, track alignment, pre-release guard, and idempotence.
-- Repo scanning engine with glob discovery, pattern matchers, dry-run summaries,
-  targeted rewrite logic, and patch computation.
-- Git automation utilities for branch creation, commits, and duplicate-safe pull
-  requests via Octokit.
-- Initial README, security, contributing, and roadmap documentation optimized for
-  SEO and onboarding.
-
-### Planned
-
-- First tagged release (`v0.x`) once end-to-end automation is validated in sandbox repositories.
-- Automated changelog updates during release workflows.
+- First official, production-ready release of the CPython Patch PR Action.
+- Comprehensive repository scanner covering GitHub workflows, Dockerfiles, `.python-version`, `.tool-versions`, `runtime.txt`, `pyproject.toml`, `Pipfile`, Conda `environment.yml`, `tox.ini`, and more.
+- Rewrite engine that computes minimal diffs, preserves suffixes (e.g. `-slim`), supports dry-run previews, and ensures idempotent reruns.
+- Version resolution pipeline combining GitHub tag discovery, python.org fallback, runner availability verification, track alignment, and configurable pre-release guard.
+- Git automation that creates or reuses `chore/bump-python-<track>` branches, commits file updates, and opens or updates pull requests with detailed bodies and rollback instructions.
+- Security keyword gating that inspects CPython release notes before applying upgrades, with offline snapshot support for air-gapped environments.
+- Outputs for downstream automation, including `files_changed`, `new_version`, `skipped_reason`, and the `change_matrix` JSON for CI matrix fan-out.
+- Cross-platform compatibility through normalized path handling and Windows coverage in the continuous integration workflow.

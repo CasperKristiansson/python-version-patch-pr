@@ -21,4 +21,4 @@ We will adopt TypeScript and follow the formatting enforced by Prettier and ESLi
 
 ## Documentation
 
-Update relevant documentation (README, docs/) when you introduce user-facing changes or new configuration options.
+Update relevant documentation (e.g. the README) when you introduce user-facing changes or new configuration options.

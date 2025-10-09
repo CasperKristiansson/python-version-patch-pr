@@ -2,8 +2,6 @@
 
 CPython Patch PR Action is a GitHub Action that automatically scans your repository for pinned CPython patch versions (e.g. `3.12.4`) and opens an evergreen pull request whenever a new patch release is available. It keeps Dockerfiles, GitHub workflows, `.python-version`, `pyproject.toml`, `runtime.txt`, `Pipfile`, Conda environment files, and more aligned with the latest stable runtime—helping teams maintain secure, up-to-date Python environments without custom automation.
 
-> **Status:** Active development. Version discovery, rewriting, dry-run summaries, branch/PR automation, and guardrails are already implemented. Follow `docs/tasks.md` for the remaining milestones.
-
 ---
 
 ## Quick start
@@ -243,7 +241,7 @@ Pre-releases are ignored unless you set `include_prerelease: true`. The guard pr
 The action is laser-focused on CPython patch updates to stay predictable, fast, and audit-friendly.
 
 **How do I see progress?**  
-Follow `docs/tasks.md`. Each numbered task explains the feature, tooling, and verification steps completed.
+Check `CHANGELOG.md` for release history and upcoming highlights.
 
 ---
 

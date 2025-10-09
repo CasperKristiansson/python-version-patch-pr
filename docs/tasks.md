@@ -215,7 +215,7 @@ Use Context7 MCP for up to date documentation.
         Tag `v0.1.0`. Maintain moving `v1`.
         Verify: Tags and Marketplace listing live.
 
-34. [ ] **Provenance + CodeQL**
+34. [x] **Provenance + CodeQL**
         Enable `codeql-analysis`. Attach provenance to releases.
         Verify: CodeQL green. Provenance present.
 

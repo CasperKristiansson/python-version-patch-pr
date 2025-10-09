@@ -171,9 +171,9 @@ Use Context7 MCP for up to date documentation.
         Include minimal and guarded examples, inputs/outputs tables, permissions, FAQs.
         Verify: `actionlint` validates examples.
 
-24. [ ] **CHANGELOG and versioning**
-        Keep `CHANGELOG.md`. Plan `v0.x` then `v1`.
-        Verify: Release notes generated on tag.
+24. [x] **CHANGELOG and versioning**
+       Keep `CHANGELOG.md`. Plan `v0.x` then `v1`.
+       Verify: Release notes generated on tag.
 
 25. [ ] **Action icon and color**
         Update `action.yml` branding.

@@ -16,6 +16,7 @@ import {
   resolveLatestPatch,
 } from './versioning';
 import { createOrUpdatePullRequest, findExistingPullRequest } from './git';
+import { validateTrack } from './config';
 
 const DEFAULT_TRACK = '3.13';
 const DEFAULT_PATHS = [
@@ -153,6 +154,7 @@ export async function run(): Promise<void> {
   try {
     const trackInput = core.getInput('track').trim();
     const track = trackInput === '' ? DEFAULT_TRACK : trackInput;
+    const validatedTrack = validateTrack(track);
 
     const includePrerelease = getBooleanInput('include_prerelease', false);
     const automerge = getBooleanInput('automerge', false);
@@ -166,7 +168,7 @@ export async function run(): Promise<void> {
 
     core.startGroup('Configuration');
     core.info(`workspace: ${workspace}`);
-    core.info(`track: ${track}`);
+    core.info(`track: ${validatedTrack}`);
     core.info(`include_prerelease: ${includePrerelease}`);
     core.info(`paths (${effectivePaths.length}): ${effectivePaths.join(', ')}`);
     core.info(`automerge: ${automerge}`);
@@ -185,7 +187,7 @@ export async function run(): Promise<void> {
     const result = await executeAction(
       {
         workspace,
-        track,
+        track: validatedTrack,
         includePrerelease,
         paths: effectivePaths,
         dryRun,

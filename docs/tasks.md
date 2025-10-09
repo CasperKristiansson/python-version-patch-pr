@@ -229,7 +229,7 @@ Use Context7 MCP for up to date documentation.
         Emit `multiple_tracks_detected`, `runners_missing`, `no_matches_found`, `already_latest`, `pr_exists`, `pr_creation_failed`.
         Verify: Tests assert outputs and logs.
 
-37. [ ] **Config validation with zod**
+37. [x] **Config validation with zod**
         Validate `track` as `/^\d+\.\d+$/`.
         Verify: Bad inputs fail fast.
 

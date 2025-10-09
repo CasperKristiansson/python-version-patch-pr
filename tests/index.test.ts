@@ -15,9 +15,16 @@ const actionExecutionMocks = vi.hoisted(() => ({
   executeAction: vi.fn(),
 }));
 
+const configMocks = vi.hoisted(() => ({
+  validateTrack: vi.fn((value: string) => value),
+}));
+
 vi.mock('@actions/core', () => coreMocks);
 vi.mock('../src/action-execution', () => ({
   executeAction: actionExecutionMocks.executeAction,
+}));
+vi.mock('../src/config', () => ({
+  validateTrack: configMocks.validateTrack,
 }));
 
 const mockGetInput = coreMocks.getInput;
@@ -29,6 +36,7 @@ const mockSetOutput = coreMocks.setOutput;
 const mockSetFailed = coreMocks.setFailed;
 const mockWarning = coreMocks.warning;
 const mockExecuteAction = actionExecutionMocks.executeAction as ReturnType<typeof vi.fn>;
+const mockValidateTrack = configMocks.validateTrack as ReturnType<typeof vi.fn>;
 
 import { run } from '../src/index';
 
@@ -46,6 +54,7 @@ describe('run', () => {
       filesChanged: ['Dockerfile'],
       dryRun: true,
     });
+    mockValidateTrack.mockImplementation((value: string) => value);
   });
 
   it('uses default configuration when inputs are empty', async () => {
@@ -133,5 +142,22 @@ describe('run', () => {
     await run();
 
     expect(mockSetFailed).toHaveBeenCalledWith('run failure');
+  });
+
+  it('fails fast when track input is invalid', async () => {
+    mockGetInput.mockImplementation((name: string) => {
+      if (name === 'track') return 'invalid';
+      return '';
+    });
+    mockValidateTrack.mockImplementation(() => {
+      throw new Error('Input "track" must match X.Y (e.g. 3.13). Received "invalid".');
+    });
+
+    await run();
+
+    expect(mockExecuteAction).not.toHaveBeenCalled();
+    expect(mockSetFailed).toHaveBeenCalledWith(
+      'Input "track" must match X.Y (e.g. 3.13). Received "invalid".',
+    );
   });
 });

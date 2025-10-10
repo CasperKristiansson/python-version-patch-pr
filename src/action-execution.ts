@@ -125,7 +125,7 @@ export async function executeAction(
     githubToken,
     repository,
     defaultBranch = 'main',
-    allowPrCreation = false,
+    allowPrCreation = true,
     noNetworkFallback = false,
     securityKeywords = [],
     snapshots,

@@ -8,6 +8,12 @@ The project follows [Semantic Versioning](https://semver.org/) and adheres to th
 
 - Nothing yet.
 
+## [1.2.0] - 2025-10-10
+
+### Fixed
+
+- Allow default runs to create pull requests again instead of always behaving like a dry-run.
+
 ## [1.1.0] - 2025-10-10
 
 ### Fixed

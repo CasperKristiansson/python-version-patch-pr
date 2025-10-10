@@ -220,6 +220,7 @@ export async function run(): Promise<void> {
 
     const includePrerelease = getBooleanInput('include_prerelease', false);
     const automerge = getBooleanInput('automerge', false);
+    const useExternalPrAction = getBooleanInput('use_external_pr_action', false);
     const dryRun = getBooleanInput('dry_run', false);
     const effectivePaths = resolvePathsInput();
     const securityKeywords = resolveSecurityKeywords();
@@ -282,6 +283,7 @@ export async function run(): Promise<void> {
       `security_keywords (${securityKeywords.length}): ${securityKeywords.length > 0 ? securityKeywords.join(', ') : '(none)'}`,
     );
     core.info(`automerge: ${automerge}`);
+    core.info(`use_external_pr_action: ${useExternalPrAction}`);
     core.info(`dry_run: ${dryRun}`);
     core.info(`no_network_fallback: ${noNetworkFallback}`);
     if (repository) {
@@ -306,7 +308,7 @@ export async function run(): Promise<void> {
         githubToken,
         repository,
         defaultBranch,
-        allowPrCreation: false,
+        allowPrCreation: !useExternalPrAction,
         noNetworkFallback,
         securityKeywords,
         snapshots: {

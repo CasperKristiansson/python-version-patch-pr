@@ -33,7 +33,8 @@ export type SkipReason =
   | 'pr_exists'
   | 'pr_creation_failed'
   | 'pre_release_guarded'
-  | 'security_gate_blocked';
+  | 'security_gate_blocked'
+  | 'workflow_permission_required';
 
 export interface ExecuteOptions {
   workspace: string;
@@ -84,6 +85,7 @@ export interface SuccessResult {
   filesChanged: string[];
   dryRun: boolean;
   pullRequest?: PullRequestResult;
+  workflowFilesSkipped?: string[];
 }
 
 export type ExecuteResult = SkipResult | SuccessResult;
@@ -107,6 +109,20 @@ function groupMatchesByFile(matches: VersionMatch[]): Map<string, VersionMatch[]
   }
 
   return grouped;
+}
+
+function isPersonalAccessToken(token: string | undefined): boolean {
+  if (!token) {
+    return false;
+  }
+
+  const lowered = token.toLowerCase();
+  return (
+    lowered.startsWith('ghp_') ||
+    lowered.startsWith('github_pat_') ||
+    lowered.startsWith('gho_') ||
+    lowered.startsWith('pat_')
+  );
 }
 
 async function applyVersionUpdates(
@@ -334,9 +350,7 @@ export async function executeAction(
     } satisfies SkipResult;
   }
 
-  const matchesNeedingUpdate = scanResult.matches.filter(
-    (match) => match.matched !== latestVersion,
-  );
+  let matchesNeedingUpdate = scanResult.matches.filter((match) => match.matched !== latestVersion);
 
   if (matchesNeedingUpdate.length === 0) {
     return {
@@ -345,6 +359,30 @@ export async function executeAction(
       newVersion: latestVersion,
       filesChanged: [],
     } satisfies SkipResult;
+  }
+
+  const hasPersonalAccessToken = isPersonalAccessToken(githubToken);
+  const workflowMatches = matchesNeedingUpdate.filter((match) =>
+    match.file.startsWith('.github/workflows/'),
+  );
+
+  let skippedWorkflowFiles: string[] = [];
+
+  if (!hasPersonalAccessToken && workflowMatches.length > 0) {
+    skippedWorkflowFiles = uniqueFiles(workflowMatches);
+    matchesNeedingUpdate = matchesNeedingUpdate.filter(
+      (match) => !match.file.startsWith('.github/workflows/'),
+    );
+
+    if (matchesNeedingUpdate.length === 0) {
+      return {
+        status: 'skip',
+        reason: 'workflow_permission_required',
+        newVersion: latestVersion,
+        filesChanged: [],
+        details: { files: skippedWorkflowFiles },
+      } satisfies SkipResult;
+    }
   }
 
   const filesChanged = uniqueFiles(matchesNeedingUpdate);
@@ -356,6 +394,7 @@ export async function executeAction(
       newVersion: latestVersion,
       filesChanged,
       dryRun: true,
+      workflowFilesSkipped: skippedWorkflowFiles.length > 0 ? skippedWorkflowFiles : undefined,
     } satisfies SuccessResult;
   }
 
@@ -365,6 +404,7 @@ export async function executeAction(
       newVersion: latestVersion,
       filesChanged,
       dryRun: false,
+      workflowFilesSkipped: skippedWorkflowFiles.length > 0 ? skippedWorkflowFiles : undefined,
     } satisfies SuccessResult;
   }
 
@@ -374,6 +414,7 @@ export async function executeAction(
       newVersion: latestVersion,
       filesChanged,
       dryRun: false,
+      workflowFilesSkipped: skippedWorkflowFiles.length > 0 ? skippedWorkflowFiles : undefined,
     } satisfies SuccessResult;
   }
 
@@ -427,6 +468,7 @@ export async function executeAction(
         newVersion: latestVersion,
         filesChanged,
         dryRun: false,
+        workflowFilesSkipped: skippedWorkflowFiles.length > 0 ? skippedWorkflowFiles : undefined,
       } satisfies SuccessResult;
     }
 
@@ -441,6 +483,7 @@ export async function executeAction(
       filesChanged,
       branchName: commitResult.branch,
       defaultBranch,
+      skippedWorkflowFiles,
     });
 
     const pullRequest = await dependencies.createOrUpdatePullRequest({
@@ -459,6 +502,7 @@ export async function executeAction(
       filesChanged,
       dryRun: false,
       pullRequest,
+      workflowFilesSkipped: skippedWorkflowFiles.length > 0 ? skippedWorkflowFiles : undefined,
     } satisfies SuccessResult;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

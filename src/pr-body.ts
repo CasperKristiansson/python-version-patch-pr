@@ -4,16 +4,18 @@ interface GeneratePullRequestBodyOptions {
   filesChanged: string[];
   branchName: string;
   defaultBranch: string;
+  skippedWorkflowFiles?: string[];
 }
 
 export function generatePullRequestBody(options: GeneratePullRequestBodyOptions): string {
-  const { track, newVersion, filesChanged, branchName, defaultBranch } = options;
+  const { track, newVersion, filesChanged, branchName, defaultBranch, skippedWorkflowFiles } =
+    options;
 
   const filesSection = filesChanged.length
     ? filesChanged.map((file) => `- \`${file}\``).join('\n')
     : 'No files were modified in this bump.';
 
-  return [
+  const bodySections = [
     '## Summary',
     '',
     `- Bump CPython ${track} pins to \`${newVersion}\`.`,
@@ -22,6 +24,22 @@ export function generatePullRequestBody(options: GeneratePullRequestBodyOptions)
     '',
     filesSection,
     '',
+  ];
+
+  if (skippedWorkflowFiles && skippedWorkflowFiles.length > 0) {
+    bodySections.push(
+      '## ⚠️ Workflow File Notice',
+      '',
+      'The following workflow files were detected but left unchanged because the provided token lacks the `workflow` scope:',
+      '',
+      ...skippedWorkflowFiles.map((file) => `- \`${file}\``),
+      '',
+      'Provide a personal access token with the `workflow` scope (for example via `GITHUB_TOKEN`) before rerunning to update these files automatically.',
+      '',
+    );
+  }
+
+  bodySections.push(
     '## Rollback',
     '',
     'Before merge, close this PR and delete the branch:',
@@ -40,5 +58,7 @@ export function generatePullRequestBody(options: GeneratePullRequestBodyOptions)
     '```',
     '',
     'Replace `<merge_commit_sha>` with the SHA of the merge commit if rollback is required.',
-  ].join('\n');
+  );
+
+  return bodySections.join('\n');
 }

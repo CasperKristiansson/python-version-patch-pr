@@ -173,6 +173,15 @@ function logSkip(result: SkipResult): void {
       );
       break;
     }
+    case 'workflow_permission_required': {
+      const workflows = Array.isArray(result.details?.files)
+        ? (result.details?.files as string[]).join(', ')
+        : '.github/workflows';
+      core.warning(
+        `This run detected workflow changes (${workflows}) but the provided token lacks workflow write permissions. Provide a personal access token with the "workflow" scope and set it as GITHUB_TOKEN to apply these updates.`,
+      );
+      break;
+    }
     default:
       core.info(`Skipping with reason ${result.reason}.`);
       break;
@@ -213,6 +222,11 @@ function summarizeResult(result: ExecuteResult): void {
     if (result.pullRequest) {
       const { action, number, url } = result.pullRequest;
       core.info(`Pull request ${action}: #${number}${url ? ` (${url})` : ''}`);
+    }
+    if (result.workflowFilesSkipped && result.workflowFilesSkipped.length > 0) {
+      core.warning(
+        `Skipped updating workflow files due to missing workflow permissions: ${result.workflowFilesSkipped.join(', ')}`,
+      );
     }
   } else {
     logSkip(result);

@@ -8,6 +8,16 @@ The project follows [Semantic Versioning](https://semver.org/) and adheres to th
 
 - Nothing yet.
 
+## [1.6.0] - 2025-10-10
+
+### Added
+
+- Include a workflow warning in generated pull request bodies when `.github/workflows/**` files change.
+
+### Fixed
+
+- Skip runs that would edit `.github/workflows/**` unless the provided token is a personal access token with the `workflow` scope, preventing GitHub App permission errors.
+
 ## [1.5.0] - 2025-10-10
 
 ### Fixed

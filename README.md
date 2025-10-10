@@ -217,11 +217,13 @@ This workflow requires:
 permissions:
   contents: write
   pull-requests: write
+```
 
 In addition to per-job permissions, the repository (or organization) wide setting under **Settings → Actions → General → Workflow permissions** must grant **Read and write permissions** and enable **“Allow GitHub Actions to create and approve pull requests”**. If that toggle cannot be enabled, provide a classic personal access token with `repo` scope via a secret (for example `PATCH_PR_TOKEN`) and export it as `GITHUB_TOKEN` when running the action.
 
 Commits authored by the action default to the current `GITHUB_ACTOR` (falling back to `github-actions[bot]`). Override this by setting `GIT_AUTHOR_NAME` and `GIT_AUTHOR_EMAIL` (and matching `GIT_COMMITTER_*`) in the workflow environment before invoking the action if you need a custom identity.
-```
+
+> **Note:** The default `GITHUB_TOKEN` cannot push updates to `.github/workflows/**`. If the action needs to rewrite workflow files, supply a personal access token that includes the `workflow` scope (often via a secret mapped to `GITHUB_TOKEN`). Runs without that scope will skip applying workflow changes and exit with `workflow_permission_required`.
 
 ## FAQ
 
@@ -253,3 +255,7 @@ MIT. See `LICENSE`.
 > Like this Action? Star the repo. Adopt it in your org. Share feedback via issues or PRs.
 
 GitHub Action for zero-maintenance CPython patch updates across your repo.
+
+```
+
+```

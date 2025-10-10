@@ -10,11 +10,15 @@ describe('generatePullRequestBody', () => {
       filesChanged: ['Dockerfile', '.github/workflows/ci.yml'],
       branchName: 'chore/bump-python-3.13',
       defaultBranch: 'main',
+      skippedWorkflowFiles: ['.github/workflows/ci.yml'],
     });
 
     expect(body).toContain('## Summary');
     expect(body).toContain('CPython 3.13 pins to `3.13.2`');
     expect(body).toContain('`Dockerfile`');
+    expect(body).toContain('Workflow File Notice');
+    expect(body).toContain('The following workflow files were detected but left unchanged');
+    expect(body).toContain('`'.concat('.github/workflows/ci.yml', '`'));
     expect(body).toContain('git push origin --delete chore/bump-python-3.13');
     expect(body).toContain('git checkout main');
     expect(body).toContain('git revert --no-edit <merge_commit_sha>');
@@ -30,5 +34,6 @@ describe('generatePullRequestBody', () => {
     });
 
     expect(body).toContain('No files were modified in this bump.');
+    expect(body).not.toContain('Workflow File Notice');
   });
 });

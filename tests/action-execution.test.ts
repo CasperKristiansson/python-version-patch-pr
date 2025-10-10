@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
@@ -149,7 +149,7 @@ describe('executeAction failure modes', () => {
         ...baseOptions,
         dryRun: false,
         allowPrCreation: true,
-        githubToken: 'token',
+        githubToken: 'ghp_token',
         repository: { owner: 'owner', repo: 'repo' },
       },
       deps,
@@ -180,7 +180,7 @@ describe('executeAction failure modes', () => {
           workspace,
           dryRun: false,
           allowPrCreation: true,
-          githubToken: 'token',
+          githubToken: 'ghp_token',
           repository: { owner: 'owner', repo: 'repo' },
         },
         deps,
@@ -191,6 +191,74 @@ describe('executeAction failure modes', () => {
         expect(result.reason).toBe('pr_creation_failed');
         expect(result.details).toEqual({ message: 'boom' });
       }
+    } finally {
+      await rm(workspace, { recursive: true, force: true });
+    }
+  });
+
+  it('skips workflow edits when only the default GITHUB_TOKEN is available', async () => {
+    deps.scanForPythonVersions = vi.fn(async () => ({
+      filesScanned: 1,
+      matches: [createMatch('.github/workflows/ci.yml', '3.13.0')],
+    }));
+
+    const result = await executeAction(
+      {
+        ...baseOptions,
+        dryRun: false,
+        allowPrCreation: true,
+        githubToken: 'ghs_default_token',
+        repository: { owner: 'owner', repo: 'repo' },
+      },
+      deps,
+    );
+
+    expect(result.status).toBe('skip');
+    if (result.status === 'skip') {
+      expect(result.reason).toBe('workflow_permission_required');
+      expect(result.details).toEqual({ files: ['.github/workflows/ci.yml'] });
+    }
+  });
+
+  it('allows workflow edits when a personal access token is provided', async () => {
+    deps.scanForPythonVersions = vi.fn(async () => ({
+      filesScanned: 1,
+      matches: [createMatch('.github/workflows/ci.yml', '3.13.0')],
+    }));
+    deps.createBranchAndCommit = vi.fn(async (options) => ({
+      branch: 'chore/bump-python-3.13',
+      commitCreated: true,
+      filesCommitted: options.files,
+    }));
+
+    const workspace = await mkdtemp(path.join(tmpdir(), 'python-version-patch-pr-'));
+    const workflowsDir = path.join(workspace, '.github/workflows');
+    await mkdir(workflowsDir, { recursive: true });
+    await writeFile(path.join(workflowsDir, 'ci.yml'), 'python-version: "3.13.0"\n');
+
+    try {
+      const result = await executeAction(
+        {
+          ...baseOptions,
+          workspace,
+          dryRun: false,
+          allowPrCreation: true,
+          githubToken: 'ghp_valid_pat',
+          repository: { owner: 'owner', repo: 'repo' },
+        },
+        deps,
+      );
+
+      expect(result.status).toBe('success');
+      if (result.status === 'success') {
+        expect(result.filesChanged).toEqual(['.github/workflows/ci.yml']);
+      }
+      expect(deps.createBranchAndCommit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          authorName: 'github-actions[bot]',
+          authorEmail: '41898282+github-actions[bot]@users.noreply.github.com',
+        }),
+      );
     } finally {
       await rm(workspace, { recursive: true, force: true });
     }

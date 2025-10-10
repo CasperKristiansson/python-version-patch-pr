@@ -8,25 +8,25 @@ Automate CPython patch updates across every Python version reference in your rep
 
 DevOps, SRE, platform, and Python maintainers need consistent runtimes without manual patching. This action:
 
-* Finds pinned CPython versions everywhere you declare them.
-* Resolves the latest stable patch and opens an evergreen PR.
-* Minimizes diffs and noise. Adds auditability and easy rollbacks.
-* Plays well with Renovate and Dependabot.
+- Finds pinned CPython versions everywhere you declare them.
+- Resolves the latest stable patch and opens an evergreen PR.
+- Minimizes diffs and noise. Adds auditability and easy rollbacks.
+- Plays well with Renovate and Dependabot.
 
 Keywords: GitHub Action, CPython patch updates, Python version management, automated dependency updates, CI/CD automation, security maintenance.
 
 ## Feature overview
 
-* Cross-file detection: Dockerfiles, GitHub workflows, `.python-version`, `.tool-versions`, `runtime.txt`, `tox.ini`, `pyproject.toml`, `Pipfile`, Conda `environment.yml`, and more.
-* Smart discovery: Pulls CPython tags from GitHub with python.org fallback. Checks GitHub runner availability. Pre-release guard on by default.
-* Minimal rewrites: Targeted replacements that preserve image suffixes like `-slim` and `-alpine`. Dry-run summary before writes.
-* Idempotent: Skips if already on latest and sets `skipped_reason=already_latest`.
-* Branch and PR automation: Predictable branch name. Updates an existing PR or opens a new one via Octokit.
-* External PR support: Emits outputs for `peter-evans/create-pull-request` when preferred.
-* Automerge ready: Hook for label or merge after checks pass.
-* Security keyword gate: Only upgrade if release notes include keywords such as `CVE` or `security`.
-* Offline snapshots: Run without network using provided tag, runner, and release notes snapshots.
-* CI matrix fan-out: Output a change matrix to scope targeted jobs.
+- Cross-file detection: Dockerfiles, GitHub workflows, `.python-version`, `.tool-versions`, `runtime.txt`, `tox.ini`, `pyproject.toml`, `Pipfile`, Conda `environment.yml`, and more.
+- Smart discovery: Pulls CPython tags from GitHub with python.org fallback. Checks GitHub runner availability. Pre-release guard on by default.
+- Minimal rewrites: Targeted replacements that preserve image suffixes like `-slim` and `-alpine`. Dry-run summary before writes.
+- Idempotent: Skips if already on latest and sets `skipped_reason=already_latest`.
+- Branch and PR automation: Predictable branch name. Updates an existing PR or opens a new one via Octokit.
+- External PR support: Emits outputs for `peter-evans/create-pull-request` when preferred.
+- Automerge ready: Hook for label or merge after checks pass.
+- Security keyword gate: Only upgrade if release notes include keywords such as `CVE` or `security`.
+- Offline snapshots: Run without network using provided tag, runner, and release notes snapshots.
+- CI matrix fan-out: Output a change matrix to scope targeted jobs.
 
 ## Quick start
 
@@ -49,7 +49,7 @@ Keywords: GitHub Action, CPython patch updates, Python version management, autom
        steps:
          - uses: actions/checkout@v4
          - name: Bump CPython patch versions
-           uses: casperkristiansson/python-version-patch-pr@v0
+           uses: casperkristiansson/python-version-patch-pr@v1
            with:
              track: '3.12'
              automerge: false
@@ -76,10 +76,10 @@ Keywords: GitHub Action, CPython patch updates, Python version management, autom
 | ------------------------ | -------- | --------------------- | --------------------------------------------------------------------------------------- |
 | `track`                  | false    | `3.13`                | CPython minor series to monitor (for example `3.12`).                                   |
 | `include_prerelease`     | false    | `false`               | Allow `rc`, `a`, or `b` releases when determining the latest patch.                     |
-| `paths`                  | false    | *(see default globs)* | Newline-separated glob patterns to scan.                                                |
+| `paths`                  | false    | _(see default globs)_ | Newline-separated glob patterns to scan.                                                |
 | `automerge`              | false    | `false`               | Label or merge the bump PR once checks pass.                                            |
 | `dry_run`                | false    | `false`               | Skip file writes and emit a change summary instead.                                     |
-| `security_keywords`      | false    | *(empty)*             | Require at least one keyword to appear in release notes before upgrading.               |
+| `security_keywords`      | false    | _(empty)_             | Require at least one keyword to appear in release notes before upgrading.               |
 | `use_external_pr_action` | false    | `false`               | Emit outputs for `peter-evans/create-pull-request` instead of using Octokit internally. |
 
 **Default globs**
@@ -108,7 +108,7 @@ Dockerfile
 
 ```yaml
 - name: CPython bump preview
-  uses: casperkristiansson/python-version-patch-pr@v0
+  uses: casperkristiansson/python-version-patch-pr@v1
   with:
     track: '3.11'
     dry_run: true
@@ -141,7 +141,7 @@ When set, the action fetches GitHub release notes for the resolved tag (or uses 
 ```yaml
 - name: Bump CPython patch versions
   id: bump_python
-  uses: casperkristiansson/python-version-patch-pr@v0
+  uses: casperkristiansson/python-version-patch-pr@v1
   with:
     use_external_pr_action: true
 
@@ -169,7 +169,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: bump
-        uses: casperkristiansson/python-version-patch-pr@v0
+        uses: casperkristiansson/python-version-patch-pr@v1
 
   targeted-tests:
     needs: bump-python
@@ -186,8 +186,8 @@ jobs:
 
 Avoid competing PRs while keeping other automated dependency updates.
 
-* `examples/coexistence/renovate.json` disables patch updates for the `python` base image and matching regex managers.
-* `examples/coexistence/dependabot.yml` ignores semver patch updates for the `python` Docker image.
+- `examples/coexistence/renovate.json` disables patch updates for the `python` base image and matching regex managers.
+- `examples/coexistence/dependabot.yml` ignores semver patch updates for the `python` Docker image.
 
 Both samples are validated by tests. Copy and adjust schedules or rules as needed.
 
@@ -195,10 +195,10 @@ Both samples are validated by tests. Copy and adjust schedules or rules as neede
 
 Run without network by providing snapshots and setting `NO_NETWORK_FALLBACK=true`.
 
-* `CPYTHON_TAGS_SNAPSHOT`: JSON array of CPython tag objects.
-* `PYTHON_ORG_HTML_SNAPSHOT`: Raw HTML or path to a saved python.org releases page.
-* `RUNNER_MANIFEST_SNAPSHOT`: JSON manifest compatible with `actions/python-versions`.
-* `RELEASE_NOTES_SNAPSHOT`: Map tags or versions to release note strings.
+- `CPYTHON_TAGS_SNAPSHOT`: JSON array of CPython tag objects.
+- `PYTHON_ORG_HTML_SNAPSHOT`: Raw HTML or path to a saved python.org releases page.
+- `RUNNER_MANIFEST_SNAPSHOT`: JSON manifest compatible with `actions/python-versions`.
+- `RELEASE_NOTES_SNAPSHOT`: Map tags or versions to release note strings.
 
 Each accepts inline data or a file path. Missing snapshots fail fast with a clear message.
 
@@ -206,8 +206,8 @@ Each accepts inline data or a file path. Missing snapshots fail fast with a clea
 
 See templates in [`examples/`](examples):
 
-* [`examples/minimal`](examples/minimal): single-job workflow scheduled weekly.
-* [`examples/guarded`](examples/guarded): dry-run preview with release-note gating and concurrency controls.
+- [`examples/minimal`](examples/minimal): single-job workflow scheduled weekly.
+- [`examples/guarded`](examples/guarded): dry-run preview with release-note gating and concurrency controls.
 
 ## Permissions
 
@@ -235,8 +235,8 @@ See `CHANGELOG.md`.
 
 ## Roadmap and contributions
 
-* Read `CONTRIBUTING.md` for local setup and standards.
-* Open issues or PRs for edge cases and roadmap items.
+- Read `CONTRIBUTING.md` for local setup and standards.
+- Open issues or PRs for edge cases and roadmap items.
 
 ## Security
 

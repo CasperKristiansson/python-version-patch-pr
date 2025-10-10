@@ -219,6 +219,8 @@ permissions:
   pull-requests: write
 
 In addition to per-job permissions, the repository (or organization) wide setting under **Settings → Actions → General → Workflow permissions** must grant **Read and write permissions** and enable **“Allow GitHub Actions to create and approve pull requests”**. If that toggle cannot be enabled, provide a classic personal access token with `repo` scope via a secret (for example `PATCH_PR_TOKEN`) and export it as `GITHUB_TOKEN` when running the action.
+
+Commits authored by the action default to the current `GITHUB_ACTOR` (falling back to `github-actions[bot]`). Override this by setting `GIT_AUTHOR_NAME` and `GIT_AUTHOR_EMAIL` (and matching `GIT_COMMITTER_*`) in the workflow environment before invoking the action if you need a custom identity.
 ```
 
 ## FAQ

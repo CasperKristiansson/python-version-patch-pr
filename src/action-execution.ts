@@ -1,4 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import process from 'node:process';
 import path from 'node:path';
 import {
   determineSingleTrack,
@@ -137,6 +138,24 @@ async function applyVersionUpdates(
       await writeFile(absolutePath, updatedContent, 'utf8');
     }
   }
+}
+
+function resolveGitIdentity(): { name: string; email: string } {
+  const actor = (process.env.GITHUB_ACTOR ?? '').trim();
+  const envAuthorName = (process.env.GIT_AUTHOR_NAME ?? '').trim();
+  const envAuthorEmail = (process.env.GIT_AUTHOR_EMAIL ?? '').trim();
+
+  const name = envAuthorName || actor || 'github-actions[bot]';
+
+  if (envAuthorEmail) {
+    return { name, email: envAuthorEmail };
+  }
+
+  if (actor) {
+    return { name, email: `${actor}@users.noreply.github.com` };
+  }
+
+  return { name, email: '41898282+github-actions[bot]@users.noreply.github.com' };
 }
 
 function determineMissingRunners(
@@ -391,11 +410,15 @@ export async function executeAction(
   try {
     await applyVersionUpdates(workspace, groupedMatches, latestVersion);
 
+    const { name: authorName, email: authorEmail } = resolveGitIdentity();
+
     const commitResult = await dependencies.createBranchAndCommit({
       repoPath: workspace,
       track,
       files: filesChanged,
       commitMessage: `chore: bump python ${track} to ${latestVersion}`,
+      authorName,
+      authorEmail,
     });
 
     if (!commitResult.commitCreated) {

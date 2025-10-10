@@ -8,6 +8,12 @@ The project follows [Semantic Versioning](https://semver.org/) and adheres to th
 
 - Nothing yet.
 
+## [1.5.0] - 2025-10-10
+
+### Fixed
+
+- Default commit author identity to GitHub Actions metadata so PR creation succeeds without custom Git configuration.
+
 ## [1.4.0] - 2025-10-10
 
 ### Added

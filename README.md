@@ -255,7 +255,3 @@ MIT. See `LICENSE`.
 > Like this Action? Star the repo. Adopt it in your org. Share feedback via issues or PRs.
 
 GitHub Action for zero-maintenance CPython patch updates across your repo.
-
-```
-
-```

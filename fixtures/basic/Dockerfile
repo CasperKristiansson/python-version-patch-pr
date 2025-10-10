@@ -1,2 +1,2 @@
-FROM python:3.11.6-slim
-ENV PYTHON_VERSION=3.11.6
+FROM python:3.13.6-slim
+ENV PYTHON_VERSION=3.13.6

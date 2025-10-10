@@ -110,7 +110,7 @@ Dockerfile
 - name: CPython bump preview
   uses: casperkristiansson/python-version-patch-pr@v1
   with:
-    track: '3.11'
+    track: '3.13'
     dry_run: true
 ```
 

@@ -31,7 +31,7 @@ jobs:
       - name: Dry run CPython patch updates
         uses: ./
         with:
-          track: '3.11'
+          track: '3.13'
           dry_run: true
           paths: |
             fixtures/${{ matrix.fixture }}/**

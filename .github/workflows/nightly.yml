@@ -26,7 +26,7 @@ jobs:
             exit 0
           fi
 
-          TRACK=${SANDBOX_TRACK:-3.11}
+          TRACK=${SANDBOX_TRACK:-3.13}
           BRANCH=${SANDBOX_DEFAULT_BRANCH:-main}
           AUTOMERGE=${SANDBOX_AUTOMERGE:-false}
 

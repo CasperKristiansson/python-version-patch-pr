@@ -34,7 +34,7 @@ jobs:
           echo "track=$TRACK" >> "$GITHUB_OUTPUT"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "automerge=$AUTOMERGE" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.check.outputs.configured == 'true'
       - uses: actions/setup-node@v4
         if: steps.check.outputs.configured == 'true'
@@ -51,7 +51,7 @@ jobs:
         run: npm run bundle
       - name: Checkout sandbox repository
         if: steps.check.outputs.configured == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ env.SANDBOX_REPO }}
           ref: ${{ steps.check.outputs.branch }}

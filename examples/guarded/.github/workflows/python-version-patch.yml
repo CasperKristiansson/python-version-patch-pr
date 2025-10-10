@@ -28,7 +28,7 @@ jobs:
 
       - name: Preview CPython patch diff
         id: preview
-        uses: casperkristiansson/python-version-patch-pr@v0
+        uses: casperkristiansson/python-version-patch-pr@v1
         with:
           track: ${{ env.TRACK }}
           dry_run: true
@@ -93,7 +93,7 @@ else:
 PY
 
       - name: Apply CPython patch update
-        uses: casperkristiansson/python-version-patch-pr@v0
+        uses: casperkristiansson/python-version-patch-pr@v1
         with:
           track: ${{ env.TRACK }}
           automerge: false

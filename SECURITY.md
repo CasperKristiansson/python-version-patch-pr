@@ -6,7 +6,7 @@ vulnerabilities responsibly.
 
 ## Supported versions
 
-Only the latest released version (the `v0` tag during the pre-1.0 cycle) receives
+Only the latest released version (the `v1` tag) receives
 security updates. Please upgrade to the newest minor release before opening security
 reports.
 
@@ -45,7 +45,7 @@ private forks or cross-organization repositories.
 
 If we confirm a critical vulnerability, we will:
 
-1. Publish a fixed release and update the `v0` tag.
+1. Publish a fixed release and update the `v1` tag.
 2. Document the risk, affected versions, and mitigation steps in the changelog.
 3. Notify followers through the repository Security Advisory system when available.
 

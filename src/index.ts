@@ -226,9 +226,11 @@ export async function run(): Promise<void> {
     const securityKeywords = resolveSecurityKeywords();
 
     const workspace = process.env.GITHUB_WORKSPACE ?? process.cwd();
+    const baseRefEnv = (process.env.GITHUB_BASE_REF ?? '').trim();
+    const refNameEnv = (process.env.GITHUB_REF_NAME ?? '').trim();
+    const defaultBranch = baseRefEnv || refNameEnv || 'main';
     const repository = parseRepository(process.env.GITHUB_REPOSITORY);
     const githubToken = process.env.GITHUB_TOKEN;
-    const defaultBranch = process.env.GITHUB_BASE_REF ?? process.env.GITHUB_REF_NAME ?? 'main';
     const noNetworkFallback = (process.env.NO_NETWORK_FALLBACK ?? '').toLowerCase() === 'true';
 
     let cpythonTagsSnapshot: StableTag[] | undefined;
@@ -286,6 +288,7 @@ export async function run(): Promise<void> {
     core.info(`use_external_pr_action: ${useExternalPrAction}`);
     core.info(`dry_run: ${dryRun}`);
     core.info(`no_network_fallback: ${noNetworkFallback}`);
+    core.info(`default_branch: ${defaultBranch}`);
     if (repository) {
       core.info(`repository: ${repository.owner}/${repository.repo}`);
     }

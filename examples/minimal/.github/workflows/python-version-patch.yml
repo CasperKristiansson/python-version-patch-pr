@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Update CPython patch versions
-        uses: casperkristiansson/python-version-patch-pr@v0
+        uses: casperkristiansson/python-version-patch-pr@v1
         with:
           track: '3.12'
         env:

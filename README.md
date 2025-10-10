@@ -1,12 +1,36 @@
 # CPython Patch PR Action
 
-CPython Patch PR Action is a GitHub Action that automatically scans your repository for pinned CPython patch versions (e.g. `3.12.4`) and opens an evergreen pull request whenever a new patch release is available. It keeps Dockerfiles, GitHub workflows, `.python-version`, `pyproject.toml`, `runtime.txt`, `Pipfile`, Conda environment files, and more aligned with the latest stable runtime—helping teams maintain secure, up-to-date Python environments without custom automation.
+Automate CPython patch updates across every Python version reference in your repo. This GitHub Action handles security maintenance, Python version management, and CI/CD automation without custom scripts.
 
----
+> Star and watch to get updates. Try the quick start below.
+
+## Why this Action
+
+DevOps, SRE, platform, and Python maintainers need consistent runtimes without manual patching. This action:
+
+* Finds pinned CPython versions everywhere you declare them.
+* Resolves the latest stable patch and opens an evergreen PR.
+* Minimizes diffs and noise. Adds auditability and easy rollbacks.
+* Plays well with Renovate and Dependabot.
+
+Keywords: GitHub Action, CPython patch updates, Python version management, automated dependency updates, CI/CD automation, security maintenance.
+
+## Feature overview
+
+* Cross-file detection: Dockerfiles, GitHub workflows, `.python-version`, `.tool-versions`, `runtime.txt`, `tox.ini`, `pyproject.toml`, `Pipfile`, Conda `environment.yml`, and more.
+* Smart discovery: Pulls CPython tags from GitHub with python.org fallback. Checks GitHub runner availability. Pre-release guard on by default.
+* Minimal rewrites: Targeted replacements that preserve image suffixes like `-slim` and `-alpine`. Dry-run summary before writes.
+* Idempotent: Skips if already on latest and sets `skipped_reason=already_latest`.
+* Branch and PR automation: Predictable branch name. Updates an existing PR or opens a new one via Octokit.
+* External PR support: Emits outputs for `peter-evans/create-pull-request` when preferred.
+* Automerge ready: Hook for label or merge after checks pass.
+* Security keyword gate: Only upgrade if release notes include keywords such as `CVE` or `security`.
+* Offline snapshots: Run without network using provided tag, runner, and release notes snapshots.
+* CI matrix fan-out: Output a change matrix to scope targeted jobs.
 
 ## Quick start
 
-1. **Add the workflow**
+1. Add a scheduled workflow.
 
    ```yaml
    name: CPython Patch Bot
@@ -34,34 +58,28 @@ CPython Patch PR Action is a GitHub Action that automatically scans your reposit
              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
    ```
 
-2. **Review the pull request** – When a patch release appears, the action creates (or updates) `chore/bump-python-<track>` with all replacements and opens a PR against your default branch.
+2. Review the PR. The action creates or updates `chore/bump-python-<track>` and opens a PR against the default branch.
 
-3. **Merge or enable automerge** – Set `automerge: true` if you want the action (or a follow-up workflow) to merge after checks succeed.
+3. Merge or enable automerge. Set `automerge: true` or wire your own automerge job.
 
----
+## How it works
 
-## Highlights
-
-- 🔍 **Cross-file detection:** Finds pinned CPython versions in Dockerfiles, GitHub Actions workflows, `.python-version`, `.tool-versions`, `runtime.txt`, `tox.ini`, `pyproject.toml`, `Pipfile`, Conda `environment.yml`, and more.
-- 🧠 **Smart discovery:** Pulls CPython tags from GitHub, falls back to python.org, checks GitHub runner availability, and enforces a pre-release guard by default.
-- ✏️ **Minimal rewrites:** Calculates targeted replacements, preserves suffixes (e.g. `-slim`, `-alpine`), and emits a dry-run summary before writing.
-- 🔁 **Idempotent runs:** Detects when everything is already on the latest patch and sets `skipped_reason=already_latest` to avoid noisy PRs.
-- 🌿 **Branch + PR automation:** Creates a consistent branch name, commits changes, and either updates an existing PR or opens a new one via Octokit.
-- 🔌 **External PR support:** Optionally emit metadata for `peter-evans/create-pull-request` if you prefer that workflow.
-- 🤖 **Automerge ready:** Honor the `automerge` flag by labeling or merging once checks pass (implementation hook provided).
-
----
+1. Scan repository for pinned CPython patch versions like `3.12.4` across supported files.
+2. Discover latest patch for the selected `track` using GitHub tags with python.org fallback.
+3. Enforce pre-release guard unless `include_prerelease: true`.
+4. Compute minimal diffs and generate a branch and PR body.
+5. If no change is needed, exit with `skipped_reason=already_latest`.
 
 ## Inputs
 
 | Input                    | Required | Default               | Description                                                                             |
 | ------------------------ | -------- | --------------------- | --------------------------------------------------------------------------------------- |
-| `track`                  | false    | `3.13`                | CPython minor series to monitor (e.g. `3.12`).                                          |
+| `track`                  | false    | `3.13`                | CPython minor series to monitor (for example `3.12`).                                   |
 | `include_prerelease`     | false    | `false`               | Allow `rc`, `a`, or `b` releases when determining the latest patch.                     |
-| `paths`                  | false    | _(see default globs)_ | Newline-separated glob patterns to scan.                                                |
+| `paths`                  | false    | *(see default globs)* | Newline-separated glob patterns to scan.                                                |
 | `automerge`              | false    | `false`               | Label or merge the bump PR once checks pass.                                            |
 | `dry_run`                | false    | `false`               | Skip file writes and emit a change summary instead.                                     |
-| `security_keywords`      | false    | _(empty)_             | Require the release notes to contain at least one of the provided keywords before upgrading. |
+| `security_keywords`      | false    | *(empty)*             | Require at least one keyword to appear in release notes before upgrading.               |
 | `use_external_pr_action` | false    | `false`               | Emit outputs for `peter-evans/create-pull-request` instead of using Octokit internally. |
 
 **Default globs**
@@ -75,22 +93,18 @@ Dockerfile
 **/pyproject.toml
 ```
 
----
-
 ## Outputs
 
 | Output           | Description                                                                                                                |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `new_version`    | Highest CPython patch identified during the run.                                                                           |
 | `files_changed`  | JSON array of files rewritten.                                                                                             |
-| `change_matrix`  | JSON object suitable for `strategy.matrix` fan-out (entries contain `file` and `new_version`).                             |
+| `change_matrix`  | JSON object for `strategy.matrix` fan-out with entries `{ file, new_version }`.                                            |
 | `skipped_reason` | Machine-readable reason when no PR is created (`already_latest`, `multiple_tracks_detected`, `pre_release_guarded`, etc.). |
 
----
+## Usage patterns
 
-## Advanced configuration
-
-### Dry-run previews
+### Dry-run preview
 
 ```yaml
 - name: CPython bump preview
@@ -100,18 +114,29 @@ Dockerfile
     dry_run: true
 ```
 
-The action prints a summary listing file paths, line numbers, and `old -> new` replacements so you can see the impact before committing.
+Prints file paths, line numbers, and `old -> new` replacements before committing.
 
 ### Pre-release guard override
-
-Keep release candidates out of production by default. Opt in when you intentionally want `rc`/alpha/beta builds:
 
 ```yaml
 with:
   include_prerelease: true
 ```
 
-### External PR workflow
+### Security keyword gate
+
+Only roll forward when release notes match keywords.
+
+```yaml
+with:
+  security_keywords: |
+    CVE
+    security
+```
+
+When set, the action fetches GitHub release notes for the resolved tag (or uses `RELEASE_NOTES_SNAPSHOT`) and skips unless a keyword matches.
+
+### External PR workflow (peter-evans)
 
 ```yaml
 - name: Bump CPython patch versions
@@ -131,24 +156,11 @@ with:
 
 ### Automerge guidance
 
-Set `automerge: true` and wire a follow-up job that applies your preferred automerge strategy (label-based, direct merge, etc.) based on the outputs emitted by the action.
+Set `automerge: true` and attach your merge strategy in a follow-up job based on the action outputs.
 
-### Security keyword gate
+### CI matrix fan-out
 
-Supply `security_keywords` (one per line) to require matching terms inside the CPython release notes before applying an update. This is useful for only auto-rolling releases that contain security fixes:
-
-```yaml
-with:
-  security_keywords: |
-    CVE
-    security
-```
-
-When the keywords are provided, the action fetches the GitHub release notes for the resolved tag (or uses the optional `RELEASE_NOTES_SNAPSHOT` offline input) and skips the run unless at least one keyword is present.
-
-### Matrix fan-out for CI
-
-Use the `change_matrix` output to drive follow-up jobs that need to iterate over the files touched by the upgrade:
+Drive targeted follow-up jobs using the `change_matrix` output.
 
 ```yaml
 jobs:
@@ -170,54 +182,36 @@ jobs:
       - run: npm test -- ${{ matrix.file }}
 ```
 
-Each matrix entry exposes `matrix.file` and `matrix.new_version`, enabling you to scope lint or test jobs to the files rewritten during the patch.
+### Renovate and Dependabot coexistence
 
-### Renovate/Dependabot coexistence
+Avoid competing PRs while keeping other automated dependency updates.
 
-If Renovate or Dependabot also try to bump CPython patch versions, they will race with this action
-and open competing pull requests. Use the sample configurations below to disable CPython patch bumps
-while still allowing those tools to manage other dependencies:
+* `examples/coexistence/renovate.json` disables patch updates for the `python` base image and matching regex managers.
+* `examples/coexistence/dependabot.yml` ignores semver patch updates for the `python` Docker image.
 
-- `examples/coexistence/renovate.json` disables patch updates for the `python` base image in Dockerfiles
-  and any custom regex managers that match CPython pins.
-- `examples/coexistence/dependabot.yml` ignores semver patch updates for the `python` Docker image
-  while keeping other ecosystems enabled.
-
-Both samples are validated by the test suite so you can copy them verbatim and adjust schedules or
-additional dependency rules as needed.
-
----
-
-## Example consumer repositories
-
-Clone one of the templates in [`examples/`](examples) to see the action running in
-the context of a real repository:
-
-- [`examples/minimal`](examples/minimal) – single-job workflow scheduled weekly.
-- [`examples/guarded`](examples/guarded) – dry-run preview with release-note
-  gating and concurrency controls.
-
-Each template ships with a README snippet and status badge you can adapt when
-bootstrapping your own public showcase repository.
+Both samples are validated by tests. Copy and adjust schedules or rules as needed.
 
 ### Offline mode
 
-Set `NO_NETWORK_FALLBACK=true` and supply snapshots so the action can run without hitting
-external endpoints:
+Run without network by providing snapshots and setting `NO_NETWORK_FALLBACK=true`.
 
-- `CPYTHON_TAGS_SNAPSHOT` – JSON array of CPython tag objects.
-- `PYTHON_ORG_HTML_SNAPSHOT` – Raw HTML or path to a saved python.org releases page.
-- `RUNNER_MANIFEST_SNAPSHOT` – JSON manifest compatible with `actions/python-versions`.
-- `RELEASE_NOTES_SNAPSHOT` – JSON object mapping tags or versions to release note strings.
+* `CPYTHON_TAGS_SNAPSHOT`: JSON array of CPython tag objects.
+* `PYTHON_ORG_HTML_SNAPSHOT`: Raw HTML or path to a saved python.org releases page.
+* `RUNNER_MANIFEST_SNAPSHOT`: JSON manifest compatible with `actions/python-versions`.
+* `RELEASE_NOTES_SNAPSHOT`: Map tags or versions to release note strings.
 
-Each variable accepts either the data directly or a path to a file containing the snapshot. When
-offline mode is enabled and a snapshot is missing, the run will fail fast with a clear message.
+Each accepts inline data or a file path. Missing snapshots fail fast with a clear message.
 
----
+## Example consumer repositories
+
+See templates in [`examples/`](examples):
+
+* [`examples/minimal`](examples/minimal): single-job workflow scheduled weekly.
+* [`examples/guarded`](examples/guarded): dry-run preview with release-note gating and concurrency controls.
 
 ## Permissions
 
-The workflow requires:
+This workflow requires:
 
 ```yaml
 permissions:
@@ -225,34 +219,33 @@ permissions:
   pull-requests: write
 ```
 
-Without these scopes, the action cannot push branches or manage pull requests.
+## FAQ
 
----
+**Multiple CPython tracks per run?**
+No. If multiple `X.Y` tracks are detected, the run exits with `skipped_reason=multiple_tracks_detected`.
 
-## Frequently asked questions
+**Latest is a pre-release?**
+Ignored unless `include_prerelease: true`.
 
-**Does it support multiple CPython tracks per run?**  
-No. If the scan finds multiple `X.Y` tracks, the run exits with `skipped_reason=multiple_tracks_detected` so you can investigate.
+**Updates other dependencies?**
+No. This action focuses on CPython patch updates for predictability and auditability.
 
-**What if the latest release is a pre-release?**  
-Pre-releases are ignored unless you set `include_prerelease: true`. The guard protects production workflows from accidental RC bumps.
+**Release history?**
+See `CHANGELOG.md`.
 
-**Can it update other dependencies?**  
-The action is laser-focused on CPython patch updates to stay predictable, fast, and audit-friendly.
+## Roadmap and contributions
 
-**How do I see progress?**  
-Check `CHANGELOG.md` for release history and upcoming highlights.
+* Read `CONTRIBUTING.md` for local setup and standards.
+* Open issues or PRs for edge cases and roadmap items.
 
----
+## Security
 
-## Getting involved
-
-- Review `CONTRIBUTING.md` for setup instructions and coding standards.
-- Open issues or PRs if you spot edge cases or want to collaborate on roadmap tasks.
-- Report security issues privately as described in `SECURITY.md`.
-
----
+Report security issues privately per `SECURITY.md`.
 
 ## License
 
-Released under the MIT License. See `LICENSE` for details.
+MIT. See `LICENSE`.
+
+> Like this Action? Star the repo. Adopt it in your org. Share feedback via issues or PRs.
+
+GitHub Action for zero-maintenance CPython patch updates across your repo.

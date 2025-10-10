@@ -14,6 +14,7 @@ Thanks for your interest in contributing to the CPython Patch PR Action! This do
 - Keep commits focused and provide meaningful messages.
 - Open a pull request early for feedback. Draft PRs are welcome.
 - Ensure automated tests and linters pass before requesting review.
+- Run `npm run bundle` and commit the generated `dist/**` output whenever you make changes that affect the action runtime.
 
 ## Code Style
 

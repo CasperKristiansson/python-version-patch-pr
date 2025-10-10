@@ -8,7 +8,14 @@ The project follows [Semantic Versioning](https://semver.org/) and adheres to th
 
 - Nothing yet.
 
-## [1.0.0] - 2025-02-14
+## [1.1.0] - 2025-10-10
+
+### Fixed
+
+- Fixed packaging so the published action includes the bundled `dist/index.js` entrypoint again.
+- Documented the requirement to rerun `npm run bundle` and commit the compiled assets when changing runtime code.
+
+## [1.0.0] - 2025-10-09
 
 ### Added
 

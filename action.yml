@@ -1,6 +1,9 @@
 name: CPython Patch PR Action
-description: Track CPython patch releases and prepare update pull requests.
+description: Automate CPython patch updates across Dockerfiles, workflows, and config files.
 author: Casper Kristiansson
+branding:
+  icon: package
+  color: blue
 inputs:
   track:
     description: CPython minor series to track (for example 3.13).
@@ -44,6 +47,5 @@ outputs:
 runs:
   using: node20
   main: dist/index.js
-branding:
   icon: python
   color: blue

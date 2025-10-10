@@ -66,30 +66,34 @@ jobs:
           fi
 
           python - <<'PY'
-import os
-import sys
-import urllib.request
+            import os
+            import sys
+            import urllib.request
 
-version = os.environ['NEW_VERSION']
-keywords = [kw.strip().lower() for kw in os.environ.get('SECURITY_KEYWORDS', '').split(',') if kw.strip()]
-if not keywords:
-    sys.exit(0)
+            version = os.environ['NEW_VERSION']
+            keywords = [
+                kw.strip().lower()
+                for kw in os.environ.get('SECURITY_KEYWORDS', '').split(',')
+                if kw.strip()
+            ]
+            if not keywords:
+                sys.exit(0)
 
-slug = 'python-' + version.replace('.', '')
-url = f'https://www.python.org/downloads/release/{slug}/'
-print(f'Fetching release notes from {url}')
-try:
-    with urllib.request.urlopen(url, timeout=30) as response:
-        body = response.read().decode('utf-8', errors='replace').lower()
-except Exception as exc:  # noqa: BLE001
-    print(f'Failed to fetch release notes: {exc}')
-    sys.exit(1)
+            slug = 'python-' + version.replace('.', '')
+            url = f'https://www.python.org/downloads/release/{slug}/'
+            print(f'Fetching release notes from {url}')
+            try:
+                with urllib.request.urlopen(url, timeout=30) as response:
+                    body = response.read().decode('utf-8', errors='replace').lower()
+            except Exception as exc:  # noqa: BLE001
+                print(f'Failed to fetch release notes: {exc}')
+                sys.exit(1)
 
-if any(keyword in body for keyword in keywords):
-    print('Security keyword detected in release notes.')
-else:
-    print('No security keywords found; aborting update.')
-    sys.exit(1)
+            if any(keyword in body for keyword in keywords):
+                print('Security keyword detected in release notes.')
+            else:
+                print('No security keywords found; aborting update.')
+                sys.exit(1)
 PY
 
       - name: Apply CPython patch update

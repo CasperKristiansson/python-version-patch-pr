@@ -17,7 +17,12 @@ import {
   fetchReleaseNotes,
   resolveLatestPatch,
 } from './versioning';
-import { createBranchAndCommit, createOrUpdatePullRequest, findExistingPullRequest, pushBranch } from './git';
+import {
+  createBranchAndCommit,
+  createOrUpdatePullRequest,
+  findExistingPullRequest,
+  pushBranch,
+} from './git';
 import { validateTrack } from './config';
 import type { StableTag } from './github';
 

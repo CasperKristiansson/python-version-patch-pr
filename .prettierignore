@@ -1,3 +1,5 @@
 dist
 node_modules
 coverage
+examples/coexistence/dependabot.yml
+examples/guarded/.github/workflows/python-version-patch.yml

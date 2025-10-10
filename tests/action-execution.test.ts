@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import {
   executeAction,
@@ -41,6 +44,12 @@ const baseDependencies = (): ExecuteDependencies => ({
     version: '3.13.1',
     availableOn: { linux: true, mac: true, win: true },
   })),
+  createBranchAndCommit: vi.fn(async () => ({
+    branch: 'chore/bump-python-3.13',
+    commitCreated: true,
+    filesCommitted: ['Dockerfile', 'runtime.txt'],
+  })),
+  pushBranch: vi.fn(async () => undefined),
   findExistingPullRequest: vi.fn(),
   createOrUpdatePullRequest: vi.fn(
     async (): Promise<PullRequestResult> => ({
@@ -159,21 +168,31 @@ describe('executeAction failure modes', () => {
       throw new Error('boom');
     });
 
-    const result = await executeAction(
-      {
-        ...baseOptions,
-        dryRun: false,
-        allowPrCreation: true,
-        githubToken: 'token',
-        repository: { owner: 'owner', repo: 'repo' },
-      },
-      deps,
-    );
+    const workspace = await mkdtemp(path.join(tmpdir(), 'python-version-patch-pr-'));
 
-    expect(result.status).toBe('skip');
-    if (result.status === 'skip') {
-      expect(result.reason).toBe('pr_creation_failed');
-      expect(result.details).toEqual({ message: 'boom' });
+    try {
+      await writeFile(path.join(workspace, 'Dockerfile'), 'FROM python:3.13.0-slim\n');
+      await writeFile(path.join(workspace, 'runtime.txt'), 'python-3.13.0\n');
+
+      const result = await executeAction(
+        {
+          ...baseOptions,
+          workspace,
+          dryRun: false,
+          allowPrCreation: true,
+          githubToken: 'token',
+          repository: { owner: 'owner', repo: 'repo' },
+        },
+        deps,
+      );
+
+      expect(result.status).toBe('skip');
+      if (result.status === 'skip') {
+        expect(result.reason).toBe('pr_creation_failed');
+        expect(result.details).toEqual({ message: 'boom' });
+      }
+    } finally {
+      await rm(workspace, { recursive: true, force: true });
     }
   });
 

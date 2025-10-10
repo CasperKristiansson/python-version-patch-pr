@@ -217,6 +217,8 @@ This workflow requires:
 permissions:
   contents: write
   pull-requests: write
+
+In addition to per-job permissions, the repository (or organization) wide setting under **Settings → Actions → General → Workflow permissions** must grant **Read and write permissions** and enable **“Allow GitHub Actions to create and approve pull requests”**. If that toggle cannot be enabled, provide a classic personal access token with `repo` scope via a secret (for example `PATCH_PR_TOKEN`) and export it as `GITHUB_TOKEN` when running the action.
 ```
 
 ## FAQ

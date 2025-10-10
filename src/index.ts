@@ -17,7 +17,7 @@ import {
   fetchReleaseNotes,
   resolveLatestPatch,
 } from './versioning';
-import { createOrUpdatePullRequest, findExistingPullRequest } from './git';
+import { createBranchAndCommit, createOrUpdatePullRequest, findExistingPullRequest, pushBranch } from './git';
 import { validateTrack } from './config';
 import type { StableTag } from './github';
 
@@ -182,6 +182,8 @@ function buildDependencies(): ExecuteDependencies {
     fetchLatestFromPythonOrg,
     enforcePreReleaseGuard,
     fetchRunnerAvailability,
+    createBranchAndCommit,
+    pushBranch,
     findExistingPullRequest,
     createOrUpdatePullRequest,
     fetchReleaseNotes,

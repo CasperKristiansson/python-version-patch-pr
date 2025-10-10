@@ -1,3 +1,5 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import {
   determineSingleTrack,
   type TrackAlignmentResult,
@@ -12,7 +14,13 @@ import {
   resolveLatestPatch,
   type LatestPatchResult,
 } from './versioning';
-import { createOrUpdatePullRequest, findExistingPullRequest, type PullRequestResult } from './git';
+import {
+  createBranchAndCommit,
+  createOrUpdatePullRequest,
+  findExistingPullRequest,
+  pushBranch,
+  type PullRequestResult,
+} from './git';
 import { generatePullRequestBody } from './pr-body';
 import type { StableTag } from './github';
 
@@ -54,6 +62,8 @@ export interface ExecuteDependencies {
   fetchLatestFromPythonOrg: typeof fetchLatestFromPythonOrg;
   enforcePreReleaseGuard: typeof enforcePreReleaseGuard;
   fetchRunnerAvailability: typeof fetchRunnerAvailability;
+  createBranchAndCommit?: typeof createBranchAndCommit;
+  pushBranch?: typeof pushBranch;
   findExistingPullRequest?: typeof findExistingPullRequest;
   createOrUpdatePullRequest?: typeof createOrUpdatePullRequest;
   fetchReleaseNotes?: typeof fetchReleaseNotes;
@@ -81,6 +91,52 @@ const DEFAULT_IGNORES = ['**/node_modules/**', '**/.git/**', '**/dist/**'];
 
 function uniqueFiles(matches: VersionMatch[]): string[] {
   return Array.from(new Set(matches.map((match) => match.file))).sort();
+}
+
+function groupMatchesByFile(matches: VersionMatch[]): Map<string, VersionMatch[]> {
+  const grouped = new Map<string, VersionMatch[]>();
+
+  for (const match of matches) {
+    const existing = grouped.get(match.file);
+    if (existing) {
+      existing.push(match);
+    } else {
+      grouped.set(match.file, [match]);
+    }
+  }
+
+  return grouped;
+}
+
+async function applyVersionUpdates(
+  workspace: string,
+  groupedMatches: Map<string, VersionMatch[]>,
+  newVersion: string,
+): Promise<void> {
+  for (const [relativePath, fileMatches] of groupedMatches) {
+    const absolutePath = path.join(workspace, relativePath);
+    const originalContent = await readFile(absolutePath, 'utf8');
+
+    const sortedMatches = [...fileMatches].sort((a, b) => b.index - a.index);
+
+    let updatedContent = originalContent;
+    let changed = false;
+
+    for (const match of sortedMatches) {
+      if (match.matched === newVersion) {
+        continue;
+      }
+
+      const start = match.index;
+      const end = start + match.matched.length;
+      updatedContent = updatedContent.slice(0, start) + newVersion + updatedContent.slice(end);
+      changed = true;
+    }
+
+    if (changed && updatedContent !== originalContent) {
+      await writeFile(absolutePath, updatedContent, 'utf8');
+    }
+  }
 }
 
 function determineMissingRunners(
@@ -273,6 +329,7 @@ export async function executeAction(
   }
 
   const filesChanged = uniqueFiles(matchesNeedingUpdate);
+  const groupedMatches = groupMatchesByFile(matchesNeedingUpdate);
 
   if (dryRun || !allowPrCreation) {
     return {
@@ -280,6 +337,15 @@ export async function executeAction(
       newVersion: latestVersion,
       filesChanged,
       dryRun: true,
+    } satisfies SuccessResult;
+  }
+
+  if (!dependencies.createBranchAndCommit || !dependencies.pushBranch) {
+    return {
+      status: 'success',
+      newVersion: latestVersion,
+      filesChanged,
+      dryRun: false,
     } satisfies SuccessResult;
   }
 
@@ -323,18 +389,41 @@ export async function executeAction(
   }
 
   try {
+    await applyVersionUpdates(workspace, groupedMatches, latestVersion);
+
+    const commitResult = await dependencies.createBranchAndCommit({
+      repoPath: workspace,
+      track,
+      files: filesChanged,
+      commitMessage: `chore: bump python ${track} to ${latestVersion}`,
+    });
+
+    if (!commitResult.commitCreated) {
+      return {
+        status: 'success',
+        newVersion: latestVersion,
+        filesChanged,
+        dryRun: false,
+      } satisfies SuccessResult;
+    }
+
+    await dependencies.pushBranch({
+      repoPath: workspace,
+      branch: commitResult.branch,
+    });
+
     const prBody = generatePullRequestBody({
       track,
       newVersion: latestVersion,
       filesChanged,
-      branchName,
+      branchName: commitResult.branch,
       defaultBranch,
     });
 
     const pullRequest = await dependencies.createOrUpdatePullRequest({
       owner: repository.owner,
       repo: repository.repo,
-      head: branchName,
+      head: commitResult.branch,
       base: defaultBranch,
       title: `chore: bump python ${track} to ${latestVersion}`,
       body: prBody,

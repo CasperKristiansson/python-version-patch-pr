@@ -20,6 +20,14 @@ export interface BranchCommitResult {
   filesCommitted: string[];
 }
 
+export interface PushBranchOptions {
+  repoPath: string;
+  branch: string;
+  remote?: string;
+  forceWithLease?: boolean;
+  setUpstream?: boolean;
+}
+
 async function branchExists(branch: string, repoPath: string): Promise<boolean> {
   try {
     await runGit(['show-ref', '--verify', `refs/heads/${branch}`], repoPath);
@@ -104,4 +112,28 @@ export async function createBranchAndCommit(
   });
 
   return { branch, commitCreated: true, filesCommitted: stagedFiles };
+}
+
+export async function pushBranch(options: PushBranchOptions): Promise<void> {
+  const {
+    repoPath,
+    branch,
+    remote = 'origin',
+    forceWithLease = true,
+    setUpstream = true,
+  } = options;
+
+  const args = ['push'];
+
+  if (setUpstream) {
+    args.push('--set-upstream');
+  }
+
+  if (forceWithLease) {
+    args.push('--force-with-lease');
+  }
+
+  args.push(remote, branch);
+
+  await runGit(args, repoPath);
 }

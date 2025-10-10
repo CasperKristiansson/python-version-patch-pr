@@ -8,6 +8,17 @@ The project follows [Semantic Versioning](https://semver.org/) and adheres to th
 
 - Nothing yet.
 
+## [1.4.0] - 2025-10-10
+
+### Added
+
+- Push the generated `chore/bump-python-<track>` branch before creating the pull request so the GitHub API accepts the head reference.
+- Apply resolved patch versions to the working tree automatically when not in dry-run mode, preserving the minimal diff behaviour.
+
+### Fixed
+
+- Documented the repository-level workflow permission toggle required for PR creation.
+
 ## [1.3.0] - 2025-10-10
 
 - Detect the default branch correctly even when `GITHUB_BASE_REF` is present but empty in scheduled workflows.

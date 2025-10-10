@@ -1,4 +1,5 @@
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import process from 'node:process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
@@ -236,6 +237,9 @@ describe('executeAction failure modes', () => {
     await mkdir(workflowsDir, { recursive: true });
     await writeFile(path.join(workflowsDir, 'ci.yml'), 'python-version: "3.13.0"\n');
 
+    const originalActor = process.env.GITHUB_ACTOR;
+    process.env.GITHUB_ACTOR = '';
+
     try {
       const result = await executeAction(
         {
@@ -260,6 +264,11 @@ describe('executeAction failure modes', () => {
         }),
       );
     } finally {
+      if (originalActor === undefined) {
+        delete process.env.GITHUB_ACTOR;
+      } else {
+        process.env.GITHUB_ACTOR = originalActor;
+      }
       await rm(workspace, { recursive: true, force: true });
     }
   });

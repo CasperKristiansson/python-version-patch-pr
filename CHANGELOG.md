@@ -8,6 +8,12 @@ The project follows [Semantic Versioning](https://semver.org/) and adheres to th
 
 - Nothing yet.
 
+## [1.6.1] - 2025-10-14
+
+### Fixed
+
+- Stop treating Docker image tags with additional dotted build metadata (such as AWS Lambda runtimes) as CPython patch pins, preventing invalid tag rewrites (#8).
+
 ## [1.6.0] - 2025-10-10
 
 ### Added

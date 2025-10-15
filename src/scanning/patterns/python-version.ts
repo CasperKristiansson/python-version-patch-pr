@@ -183,6 +183,14 @@ export function findPythonVersionMatches(filePath: string, content: string): Ver
 
         const relativeIndex = match[0].indexOf(version);
         const versionIndex = match.index + (relativeIndex >= 0 ? relativeIndex : 0);
+        const patchContinuationIndex = versionIndex + version.length;
+        const nextChar = content[patchContinuationIndex];
+        const nextNextChar = content[patchContinuationIndex + 1];
+
+        if (nextChar === '.' && nextNextChar && /\d/.test(nextNextChar)) {
+          continue;
+        }
+
         const position = indexToPosition(content, versionIndex);
 
         results.push({

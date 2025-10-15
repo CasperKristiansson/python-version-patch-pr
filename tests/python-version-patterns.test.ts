@@ -29,6 +29,14 @@ describe('findPythonVersionMatches', () => {
     expect(matches.map((match) => match.matched)).toEqual(['3.13.2', '3.12.8', '3.12.8']);
   });
 
+  it('skips Docker image tags with extended build identifiers', () => {
+    const content = `FROM public.ecr.aws/lambda/python:3.13.2025.08.15.14\n`;
+
+    const matches = findPythonVersionMatches('Dockerfile', content);
+
+    expect(matches).toHaveLength(0);
+  });
+
   it('reads the version from .python-version files', () => {
     const matches = findPythonVersionMatches('.python-version', '3.10.14\n');
 

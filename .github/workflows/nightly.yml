@@ -36,7 +36,7 @@ jobs:
           echo "automerge=$AUTOMERGE" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v5
         if: steps.check.outputs.configured == 'true'
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         if: steps.check.outputs.configured == 'true'
         with:
           node-version: 20

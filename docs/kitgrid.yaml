@@ -11,13 +11,13 @@ refs:
 docs_path: docs
 homepage: docs/README.md
 theme:
-  primary: "#0B5FFF"
-  secondary: "#1F2937"
-  bg: "#FFFFFF"
-  surface: "#F3F4F6"
-  text: "#0F172A"
-  muted: "#6B7280"
-  link: "#0B5FFF"
+  primary: '#0B5FFF'
+  secondary: '#1F2937'
+  bg: '#FFFFFF'
+  surface: '#F3F4F6'
+  text: '#0F172A'
+  muted: '#6B7280'
+  link: '#0B5FFF'
   code_theme: kitgrid-light
   motion: subtle
 features:
@@ -25,11 +25,9 @@ features:
   search: true
   versions: false
 nav:
-  - title: Overview
-    path: docs/README.md
+  - title: Getting Started
+    path: docs/workflows.md
     children:
-      - title: Documentation portal
-        path: docs/README.md
       - title: Workflow recipes
         path: docs/workflows.md
       - title: Examples & outputs

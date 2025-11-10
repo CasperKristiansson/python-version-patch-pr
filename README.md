@@ -204,10 +204,10 @@ Each accepts inline data or a file path. Missing snapshots fail fast with a clea
 
 ## Example consumer repositories
 
-See templates in [`examples/`](examples):
+See templates in [`examples/`](https://github.com/CasperKristiansson/python-version-patch-pr/tree/main/examples):
 
-- [`examples/minimal`](examples/minimal): single-job workflow scheduled weekly.
-- [`examples/guarded`](examples/guarded): dry-run preview with release-note gating and concurrency controls.
+- [`examples/minimal`](https://github.com/CasperKristiansson/python-version-patch-pr/tree/main/examples/minimal): single-job workflow scheduled weekly.
+- [`examples/guarded`](https://github.com/CasperKristiansson/python-version-patch-pr/tree/main/examples/guarded): dry-run preview with release-note gating and concurrency controls.
 
 ## Permissions
 

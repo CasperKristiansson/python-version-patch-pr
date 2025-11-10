@@ -1,0 +1,46 @@
+id: python-version-patch-pr
+name: CPython Patch PR Action
+description: GitHub Action that scans repositories for pinned CPython versions and opens PRs with the latest patch releases.
+repo: CasperKristiansson/python-version-patch-pr
+ref_strategy: branch
+refs:
+  default: main
+  include:
+    - release
+    - docs-preview
+docs_path: docs
+homepage: docs/README.md
+theme:
+  primary: "#0B5FFF"
+  secondary: "#1F2937"
+  bg: "#FFFFFF"
+  surface: "#F3F4F6"
+  text: "#0F172A"
+  muted: "#6B7280"
+  link: "#0B5FFF"
+  code_theme: kitgrid-light
+  motion: subtle
+features:
+  edit_link: true
+  search: true
+  versions: false
+nav:
+  - title: Overview
+    path: docs/README.md
+    children:
+      - title: Documentation portal
+        path: docs/README.md
+      - title: Workflow recipes
+        path: docs/workflows.md
+      - title: Examples & outputs
+        path: docs/examples.md
+  - title: Architecture
+    path: docs/architecture.md
+  - title: Configuration
+    path: docs/configuration.md
+  - title: Development
+    path: docs/development.md
+  - title: Testing
+    path: docs/testing.md
+  - title: Troubleshooting
+    path: docs/troubleshooting.md

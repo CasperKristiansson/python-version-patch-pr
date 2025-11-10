@@ -3,6 +3,7 @@
 Automate CPython patch updates across every Python version reference in your repo. This GitHub Action handles security maintenance, Python version management, and CI/CD automation without custom scripts.
 
 > Star and watch to get updates. Try the quick start below.
+> 📘 Need the full docs? Head over to https://python-version-patch-pr.kitgrid.dev/ for detailed guides and examples.
 
 ## Why this Action
 
